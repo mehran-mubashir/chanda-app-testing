@@ -1,0 +1,4332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2d6a4f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chanda Tracker">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Chanda Tracker">
+<meta name="description" content="Track your religious financial obligations for Ahmadiyya Muslim Community">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' blob:; img-src 'self' data:; connect-src 'none';">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232d6a4f'/><text y='.9em' font-size='80' x='10'>☪</text></svg>">
+<title>Chanda Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:   #2a6644;
+    --green-l: #f0f5f2;
+    --green-m: #d8ece1;
+    --ink:     #1a1a1a;
+    --mid:     #555;
+    --soft:    #999;
+    --line:    #e8e8e4;
+    --line2:   #f2f2ee;
+    --bg:      #f4f4f0;
+    --white:   #ffffff;
+    --gold:    #b5860d;
+    --gold-l:  #fdf8ee;
+    --gold-m:  #f0d98a;
+    --red:     #c0392b;
+    --red-l:   #fdf3f3;
+    --amber:   #d97706;
+    --amber-l: #fffbeb;
+    --blue:    #3a5fa0;
+    --blue-l:  #f0f4fd;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body { height:100%; margin:0; padding:0; }
+  body {
+    font-family:'Inter',sans-serif;
+    background:#d8d8d4;
+    min-height:100vh;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px 16px;
+    box-sizing:border-box;
+  }
+
+  /* ── PHONE ── */
+  .phone {
+    width:390px;
+    height:820px;
+    max-height:96vh;
+    background:var(--bg);
+    border-radius:44px;
+    box-shadow:0 32px 80px rgba(0,0,0,.28), 0 0 0 1px rgba(0,0,0,.08);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  /* ── STATUS BAR ── */
+  .sbar {
+    background:var(--white);
+    padding:14px 28px 10px;
+    display:flex; justify-content:space-between; align-items:center;
+    flex-shrink:0;
+  }
+  .sbar-time { font-size:15px; font-weight:600; color:var(--ink); letter-spacing:-.3px; }
+  .sbar-icons { display:flex; align-items:center; gap:5px; color:var(--ink); }
+
+  /* ── SCREENS ── */
+  .screen { display:none; flex-direction:column; flex:1; overflow:hidden; }
+  .screen.active { display:flex; }
+
+  /* ── SCROLL BODY ── */
+  .sbody {
+    flex:1; overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    padding:18px 18px 90px;
+  }
+  .sbody::-webkit-scrollbar { display:none; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+  .screen.active .sbody { animation:fadeUp .25s ease; }
+
+  /* ── SHARED COMPONENTS ── */
+  .topnav {
+    background:var(--white);
+    padding:10px 20px 16px;
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .topnav-row { display:flex; align-items:center; justify-content:space-between; }
+  .nav-title { font-family:'Lora',serif; font-size:22px; font-weight:700; color:var(--ink); letter-spacing:-.4px; }
+  .settings-btn {
+    width:34px; height:34px; border-radius:9px;
+    border:1.5px solid var(--line); background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; cursor:pointer; transition:all .15s;
+  }
+  .settings-btn:hover { border-color:var(--green); background:var(--green-l); }
+
+  .slabel {
+    font-size:10px; font-weight:700; color:var(--soft);
+    letter-spacing:1px; text-transform:uppercase;
+    margin-bottom:8px; margin-top:2px;
+    display:flex; align-items:center; gap:6px;
+  }
+
+  .card {
+    background:var(--white); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden; margin-bottom:14px;
+  }
+
+  .month-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:5px 12px; background:var(--green-l);
+    border:1px solid var(--green-m); border-radius:99px;
+    margin-top:10px;
+  }
+  .mp-dot { width:6px; height:6px; border-radius:50%; background:var(--green); }
+  .mp-text { font-size:12px; font-weight:600; color:var(--green); }
+
+  /* ── BOTTOM NAV ── */
+  .bottomnav {
+    position:absolute; bottom:0; left:0; right:0;
+    background:var(--white); border-top:1px solid var(--line);
+    padding:10px 6px 22px;
+    display:flex; justify-content:space-around;
+    flex-shrink:0;
+  }
+  .bnav-item {
+    display:flex; flex-direction:column; align-items:center;
+    gap:3px; padding:5px 10px; border-radius:10px;
+    cursor:pointer; transition:all .15s; flex:1;
+  }
+  .bnav-item:hover { background:var(--bg); }
+  .bnav-icon { font-size:20px; line-height:1; }
+  .bnav-label { font-size:10px; font-weight:600; color:var(--soft); }
+  .bnav-item.on .bnav-label { color:var(--green); }
+  .bnav-active-dot {
+    width:4px; height:4px; border-radius:50%; background:var(--green);
+    margin-top:1px; opacity:0; transition:opacity .2s;
+  }
+  .bnav-item.on .bnav-active-dot { opacity:1; }
+
+  /* ════════════════════════════════
+     HOME SCREEN
+  ════════════════════════════════ */
+  .home-hero {
+    background:var(--green);
+    padding:20px 20px 28px;
+    flex-shrink:0;
+  }
+  .hero-greeting { font-size:13px; color:rgba(255,255,255,.6); font-weight:500; margin-bottom:4px; }
+  .hero-name { font-family:'Lora',serif; font-size:24px; font-weight:700; color:white; letter-spacing:-.4px; margin-bottom:16px; }
+  .hero-month { font-size:11px; color:rgba(255,255,255,.5); font-weight:600; letter-spacing:.6px; text-transform:uppercase; margin-bottom:4px; }
+  .hero-due { font-family:'Lora',serif; font-size:38px; font-weight:700; color:white; letter-spacing:-1px; line-height:1; }
+  .hero-sub { font-size:12px; color:rgba(255,255,255,.6); margin-top:4px; }
+
+  /* Hero quick stats */
+  .hero-stats { display:flex; gap:8px; margin-top:18px; }
+  .hstat {
+    flex:1; background:rgba(255,255,255,.12); border-radius:10px;
+    padding:10px 12px; border:1px solid rgba(255,255,255,.1);
+  }
+  .hstat-val { font-size:15px; font-weight:700; color:white; font-family:'Lora',serif; letter-spacing:-.3px; }
+  .hstat-lbl { font-size:10px; color:rgba(255,255,255,.5); font-weight:600; margin-top:2px; letter-spacing:.3px; }
+
+  /* Quick pay card */
+  .qpay-card {
+    background:var(--white); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden; margin-bottom:14px;
+  }
+  .qpay-header { padding:14px 16px 10px; display:flex; justify-content:space-between; align-items:center; }
+  .qpay-title { font-size:14px; font-weight:700; color:var(--ink); }
+  .qpay-month { font-size:11px; font-weight:600; color:var(--soft); }
+
+  .qpay-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 16px; border-top:1px solid var(--line2);
+    gap:10px;
+  }
+  .qpay-left { display:flex; align-items:center; gap:9px; }
+  .qpay-icon { font-size:16px; }
+  .qpay-name { font-size:13px; font-weight:500; color:var(--ink); }
+  .qpay-amt  { font-size:13px; font-weight:700; color:var(--mid); }
+
+  .qpay-status {
+    padding:4px 10px; border-radius:6px;
+    font-size:10px; font-weight:700;
+    letter-spacing:.3px; text-transform:uppercase;
+    flex-shrink:0;
+  }
+  .qs-paid    { background:var(--green-l); color:var(--green); }
+  .qs-due     { background:var(--red-l); color:var(--red); }
+  .qs-partial { background:var(--amber-l); color:var(--amber); }
+
+  .qpay-total {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:13px 16px; background:var(--bg); border-top:1px solid var(--line2);
+  }
+  .qt-label { font-size:13px; font-weight:700; color:var(--ink); }
+  .qt-amt   { font-family:'Lora',serif; font-size:20px; font-weight:700; color:var(--ink); letter-spacing:-.4px; }
+
+  .pay-now-btn {
+    width:calc(100% - 32px); margin:0 16px 16px;
+    padding:12px; background:var(--green); color:white;
+    border:none; border-radius:9px; font-family:'Inter',sans-serif;
+    font-size:14px; font-weight:600; cursor:pointer; transition:all .15s;
+  }
+  .pay-now-btn:hover { background:#235538; }
+
+  /* Year ring */
+  .year-ring-card {
+    background:var(--white); border:1px solid var(--line);
+    border-radius:14px; padding:18px; margin-bottom:14px;
+    display:flex; align-items:center; gap:18px;
+  }
+  .ring-wrap { position:relative; width:80px; height:80px; flex-shrink:0; }
+  .ring-svg { width:80px; height:80px; transform:rotate(-90deg); }
+  .ring-bg   { fill:none; stroke:var(--line); stroke-width:7; }
+  .ring-fill { fill:none; stroke:var(--green); stroke-width:7; stroke-linecap:round; stroke-dasharray:220; stroke-dashoffset:94; transition:stroke-dashoffset .6s ease; }
+  .ring-label { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-pct { font-size:16px; font-weight:700; color:var(--green); font-family:'Lora',serif; line-height:1; }
+  .ring-sub { font-size:9px; color:var(--soft); font-weight:600; letter-spacing:.3px; margin-top:2px; }
+  .ring-info { flex:1; }
+  .ri-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+  .ri-paid  { font-size:13px; color:var(--green); font-weight:600; }
+  .ri-of    { font-size:12px; color:var(--soft); margin-top:2px; }
+  .ri-remaining { font-size:12px; color:var(--mid); margin-top:6px; font-weight:500; }
+
+  /* Missed alert */
+  .missed-alert {
+    background:var(--red-l); border:1px solid #f5c6c6;
+    border-radius:12px; padding:13px 15px; margin-bottom:14px;
+    display:flex; align-items:center; gap:10px; cursor:pointer;
+    transition:opacity .15s;
+  }
+  .missed-alert:hover { opacity:.85; }
+  .ma-icon { font-size:20px; flex-shrink:0; }
+  .ma-text { flex:1; }
+  .ma-title { font-size:13px; font-weight:700; color:var(--red); }
+  .ma-sub   { font-size:11px; color:var(--red); opacity:.7; margin-top:2px; }
+  .ma-arrow { font-size:14px; color:var(--red); }
+
+  /* ════════════════════════════════
+     CHANDAS SCREEN
+  ════════════════════════════════ */
+  .ctabs { display:flex; gap:6px; padding:0 18px 14px; background:var(--white); border-bottom:1px solid var(--line); flex-shrink:0; }
+  .ctab {
+    flex:1; padding:8px 4px; border-radius:8px;
+    border:1.5px solid var(--line); background:transparent;
+    font-family:'Inter',sans-serif; font-size:11px; font-weight:600;
+    color:var(--soft); cursor:pointer; transition:all .18s; text-align:center;
+  }
+  .ctab:hover { border-color:var(--mid); color:var(--mid); }
+  .ctab.on { background:var(--green); border-color:var(--green); color:white; }
+
+  .ctab-panel { display:none; }
+  .ctab-panel.on { display:block; animation:fadeUp .2s ease; padding-top:14px; }
+
+  .slabel-badge { font-size:9px; font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:.4px; text-transform:uppercase; }
+  .slabel-badge.lazmi { background:var(--green-l); color:var(--green); }
+  .slabel-badge.temp  { background:var(--gold-l);  color:var(--gold); }
+
+  .chanda-card { background:var(--white); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:14px; }
+  .chanda-row { display:flex; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line2); gap:12px; transition:background .12s; }
+  .chanda-row:last-child { border-bottom:none; }
+  .chanda-row:hover { background:var(--bg); }
+  .ch-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+  .ch-icon.green { background:var(--green-l); }
+  .ch-icon.gold  { background:var(--gold-l); }
+  .ch-info { flex:1; min-width:0; }
+  .ch-name { font-size:14px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+  .ch-desc { font-size:11px; color:var(--soft); }
+  .ch-amounts { text-align:right; flex-shrink:0; }
+  .ch-primary { font-family:'Lora',serif; font-size:17px; font-weight:700; color:var(--ink); letter-spacing:-.3px; margin-bottom:2px; }
+  .ch-secondary { font-size:11px; color:var(--soft); }
+  .rate-tag { display:inline-block; padding:1px 6px; border-radius:4px; font-size:10px; font-weight:700; letter-spacing:.3px; }
+  .rate-tag.green { background:var(--green-l); color:var(--green); }
+  .rate-tag.gold  { background:var(--gold-l);  color:var(--gold); }
+
+  .basis-card {
+    background:var(--white); border:1px solid var(--line);
+    border-radius:12px; padding:13px 15px; margin-bottom:14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .basis-label { font-size:10px; font-weight:700; color:var(--soft); letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; }
+  .basis-val { font-family:'Lora',serif; font-size:20px; font-weight:700; color:var(--ink); letter-spacing:-.4px; }
+  .basis-sub { font-size:11px; color:var(--soft); margin-top:2px; }
+  .edit-link {
+    font-size:12px; font-weight:600; color:var(--green);
+    padding:6px 12px; border:1.5px solid var(--green-m);
+    border-radius:7px; background:var(--green-l); cursor:pointer; transition:all .15s;
+  }
+  .edit-link:hover { background:var(--green-m); }
+
+  .total-card { background:var(--white); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:14px; }
+  .total-top { padding:16px 16px 14px; border-bottom:1px solid var(--line2); }
+  .total-label { font-size:10px; font-weight:700; color:var(--soft); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+  .total-main { font-family:'Lora',serif; font-size:32px; font-weight:700; color:var(--ink); letter-spacing:-1px; line-height:1; margin-bottom:3px; }
+  .total-sub-t { font-size:11px; color:var(--soft); }
+  .total-row { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line2); }
+  .total-row:last-child { border-bottom:none; }
+  .total-row.highlight { background:var(--bg); }
+  .tr-left { display:flex; align-items:center; gap:8px; }
+  .tr-dot  { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .tr-name { font-size:12px; color:var(--mid); }
+  .tr-name.bold { font-weight:700; color:var(--ink); }
+  .tr-val  { font-size:13px; font-weight:600; color:var(--ink); }
+  .tr-val.green { color:var(--green); }
+  .tr-val.gold  { color:var(--gold); }
+
+  /* ════════════════════════════════
+     PAYMENTS SCREEN
+  ════════════════════════════════ */
+  .outstanding {
+    background:var(--red-l); border:1px solid #f5c6c6;
+    border-radius:12px; padding:14px 16px; margin-bottom:14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .os-label { font-size:10px; font-weight:700; color:var(--red); letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; }
+  .os-amt { font-family:'Lora',serif; font-size:22px; font-weight:700; color:var(--red); letter-spacing:-.5px; }
+  .os-sub { font-size:11px; color:var(--red); opacity:.7; margin-top:2px; }
+
+  .curr-month-header { padding:16px 16px 0; }
+  .cm-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+  .cm-month { font-family:'Lora',serif; font-size:20px; font-weight:700; color:var(--ink); letter-spacing:-.4px; }
+  .cm-sub   { font-size:11px; color:var(--soft); margin-top:2px; }
+  .curr-status-badge { padding:5px 11px; border-radius:7px; font-size:11px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
+  .csb-unpaid { background:var(--red-l); color:var(--red); }
+  .csb-paid   { background:var(--green-l); color:var(--green); }
+  .csb-partial{ background:var(--amber-l); color:var(--amber); }
+
+  .cm-breakdown { border-top:1px solid var(--line2); }
+  .cm-row { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line2); }
+  .cm-row:last-child { border-bottom:none; }
+  .cm-row-name { font-size:12px; color:var(--mid); }
+  .cm-row-amt  { font-size:13px; font-weight:600; color:var(--ink); }
+  .cm-total-row { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--bg); border-top:1px solid var(--line2); }
+  .cm-total-label { font-size:13px; font-weight:700; color:var(--ink); }
+  .cm-total-amt   { font-family:'Lora',serif; font-size:20px; font-weight:700; color:var(--ink); letter-spacing:-.4px; }
+
+  .pay-action { padding:14px 16px 16px; border-top:1px solid var(--line2); }
+  .pay-status-row { display:flex; gap:8px; margin-bottom:12px; }
+  .ps-btn {
+    flex:1; padding:10px 6px; border-radius:9px;
+    border:1.5px solid var(--line); background:var(--bg);
+    font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+    color:var(--soft); cursor:pointer; transition:all .15s; text-align:center;
+  }
+  .ps-btn:hover { border-color:var(--mid); color:var(--mid); }
+  .ps-btn.paid-on    { background:var(--green); border-color:var(--green); color:white; }
+  .ps-btn.partial-on { background:var(--amber-l); border-color:var(--amber); color:var(--amber); }
+  .ps-btn.missed-on  { background:var(--red-l); border-color:var(--red); color:var(--red); }
+
+  /* Partial per-chanda */
+  .partial-wrap { display:none; margin-bottom:12px; flex-direction:column; gap:0; }
+  .partial-wrap.show { display:flex; animation:fadeUp .2s ease; }
+  .partial-header { font-size:11px; font-weight:700; color:var(--amber); letter-spacing:.7px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .partial-header::before { content:''; display:block; width:3px; height:12px; background:var(--amber); border-radius:2px; }
+  .partial-chanda-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 13px; border:1.5px solid var(--line); border-radius:9px;
+    margin-bottom:7px; cursor:pointer; transition:all .15s; background:var(--white); gap:10px;
+  }
+  .partial-chanda-row:hover { border-color:var(--amber); background:var(--amber-l); }
+  .partial-chanda-row.checked { border-color:var(--amber); background:var(--amber-l); }
+  .pc-row-left { display:flex; align-items:center; gap:9px; flex:1; }
+  .pc-row-icon { font-size:15px; }
+  .pc-row-name { font-size:13px; font-weight:600; color:var(--ink); }
+  .pc-row-amt  { font-size:11px; color:var(--soft); margin-top:1px; }
+  .pc-checkbox {
+    width:20px; height:20px; border-radius:6px;
+    border:2px solid var(--line); background:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:all .15s; font-size:11px; color:transparent;
+  }
+  .partial-chanda-row.checked .pc-checkbox { background:var(--amber); border-color:var(--amber); color:white; }
+  .partial-total-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 13px; background:var(--bg); border-radius:8px;
+    border:1px solid var(--line2); margin-top:2px; margin-bottom:2px;
+  }
+  .pt-label { font-size:11px; font-weight:600; color:var(--mid); }
+  .pt-amt   { font-size:14px; font-weight:700; color:var(--amber); font-family:'Lora',serif; }
+
+  .save-btn {
+    width:100%; padding:13px; background:var(--green); color:white;
+    border:none; border-radius:9px; font-family:'Inter',sans-serif;
+    font-size:14px; font-weight:600; cursor:pointer; transition:all .15s;
+  }
+  .save-btn:hover { background:#235538; }
+  .save-btn:active { transform:scale(.99); }
+
+  .past-item {
+    display:flex; align-items:center; gap:12px;
+    padding:13px 16px; border-bottom:1px solid var(--line2);
+    cursor:pointer; transition:background .12s;
+  }
+  .past-item:last-child { border-bottom:none; }
+  .past-item:hover { background:var(--bg); }
+  .past-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .dot-paid    { background:var(--green); }
+  .dot-partial { background:var(--amber); }
+  .dot-missed  { background:var(--red); }
+  .past-info { flex:1; }
+  .past-month { font-size:13px; font-weight:600; color:var(--ink); }
+  .past-sub   { font-size:11px; color:var(--soft); margin-top:1px; }
+  .past-right { text-align:right; }
+  .past-amt   { font-size:13px; font-weight:600; }
+  .past-amt.paid    { color:var(--green); }
+  .past-amt.partial { color:var(--amber); }
+  .past-amt.missed  { color:var(--red); }
+  .past-status { font-size:10px; color:var(--soft); margin-top:1px; text-transform:uppercase; font-weight:600; letter-spacing:.4px; }
+
+  /* ════════════════════════════════
+     SUMMARY SCREEN
+  ════════════════════════════════ */
+  .year-selector { display:flex; background:var(--white); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:14px; }
+  .ys-btn { flex:1; padding:10px 6px; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:11px; font-weight:600; color:var(--soft); cursor:pointer; transition:all .18s; border-right:1px solid var(--line); text-align:center; line-height:1.3; }
+  .ys-btn:last-child { border-right:none; }
+  .ys-btn.on { background:var(--green); color:white; }
+  .ys-btn:hover:not(.on) { background:var(--bg); color:var(--mid); }
+
+  .progress-card { background:var(--white); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:14px; }
+  .pc-label { font-size:10px; font-weight:700; color:var(--soft); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+  .pc-year  { font-size:12px; font-weight:600; color:var(--mid); margin-bottom:10px; }
+  .pc-amounts { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px; }
+  .pc-paid-amt { font-family:'Lora',serif; font-size:30px; font-weight:700; color:var(--green); letter-spacing:-.8px; }
+  .pc-of { font-size:13px; color:var(--soft); font-weight:400; margin-bottom:6px; }
+  .pc-total-amt { font-family:'Lora',serif; font-size:18px; font-weight:600; color:var(--ink); letter-spacing:-.4px; }
+  .prog-track { height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:8px; }
+  .prog-fill  { height:100%; background:var(--green); border-radius:99px; transition:width .6s ease; }
+  .pc-meta { display:flex; justify-content:space-between; align-items:center; }
+  .pc-pct { font-size:12px; font-weight:700; color:var(--green); }
+  .pc-remaining { font-size:12px; color:var(--soft); }
+
+  .breakdown-row { padding:13px 16px; border-bottom:1px solid var(--line2); }
+  .breakdown-row:last-child { border-bottom:none; }
+  .br-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+  .br-left { display:flex; align-items:center; gap:8px; }
+  .br-icon { font-size:15px; }
+  .br-name { font-size:13px; font-weight:600; color:var(--ink); }
+  .br-right { text-align:right; }
+  .br-paid { font-size:13px; font-weight:700; color:var(--green); }
+  .br-of   { font-size:11px; color:var(--soft); }
+  .br-bar-track { height:4px; background:var(--line); border-radius:99px; overflow:hidden; }
+  .br-bar-fill { height:100%; border-radius:99px; transition:width .5s ease; }
+  .br-bar-fill.green { background:var(--green); }
+  .br-bar-fill.gold  { background:var(--gold); }
+
+  .month-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; padding:14px; }
+  .mg-tile { border-radius:9px; padding:9px 4px; text-align:center; cursor:pointer; transition:all .15s; border:1.5px solid transparent; position:relative; }
+  .mg-tile:hover { opacity:.85; }
+  .mg-name   { font-size:11px; font-weight:600; color:var(--ink); display:block; }
+  .mg-status { font-size:9px; font-weight:600; display:block; margin-top:2px; letter-spacing:.3px; text-transform:uppercase; }
+  .mg-paid    { background:var(--green-l); border-color:var(--green-m); }
+  .mg-paid .mg-status    { color:var(--green); }
+  .mg-partial { background:var(--amber-l); border-color:#fde68a; }
+  .mg-partial .mg-status { color:var(--amber); }
+  .mg-missed  { background:var(--red-l); border-color:#fecaca; }
+  .mg-missed .mg-status  { color:var(--red); }
+  .mg-current { background:var(--white); border-color:var(--green); }
+  .mg-current .mg-name   { color:var(--green); }
+  .mg-current .mg-status { color:var(--green); }
+  .mg-upcoming{ background:var(--bg); border-color:var(--line); opacity:.45; cursor:default; }
+  .mg-upcoming .mg-status{ color:var(--soft); }
+  .now-dot { width:5px; height:5px; border-radius:50%; background:var(--green); position:absolute; top:5px; right:5px; }
+
+  .projection-card {
+    background:var(--green-l); border:1px solid var(--green-m);
+    border-radius:12px; padding:14px 16px; margin-bottom:14px;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .proj-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
+  .proj-text { font-size:13px; color:var(--green); font-weight:500; line-height:1.5; }
+  .proj-text strong { font-weight:700; }
+
+  /* ════════════════════════════════
+     HAMBURGER BUTTON
+  ════════════════════════════════ */
+  .hamburger {
+    width:34px; height:34px; border-radius:9px;
+    border:1.5px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.12);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:4px; cursor:pointer; transition:all .15s;
+    flex-shrink:0;
+  }
+  .hamburger:hover { background:rgba(255,255,255,.22); }
+  .hb-line {
+    width:14px; height:1.5px;
+    background:rgba(255,255,255,.9);
+    border-radius:2px;
+  }
+
+  /* ════════════════════════════════
+     DRAWER OVERLAY + PANEL
+  ════════════════════════════════ */
+  .drawer-overlay {
+    position:absolute; inset:0;
+    background:rgba(0,0,0,.45);
+    z-index:200;
+    opacity:0; pointer-events:none;
+    transition:opacity .28s ease;
+  }
+  .drawer-overlay.open { opacity:1; pointer-events:all; }
+
+  .drawer {
+    position:absolute; top:0; left:0; bottom:0;
+    width:300px;
+    background:var(--white);
+    z-index:210;
+    display:flex; flex-direction:column;
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    overflow:hidden;
+  }
+  .drawer.open { transform:translateX(0); }
+
+  /* Drawer header */
+  .drawer-head {
+    background:var(--green);
+    padding:48px 20px 20px;
+    flex-shrink:0;
+  }
+  .drawer-close {
+    position:absolute; top:52px; right:16px;
+    width:28px; height:28px; border-radius:7px;
+    background:rgba(255,255,255,.15); border:none;
+    color:white; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s;
+  }
+  .drawer-close:hover { background:rgba(255,255,255,.25); }
+  .drawer-avatar {
+    width:48px; height:48px; border-radius:50%;
+    background:rgba(255,255,255,.2);
+    border:2px solid rgba(255,255,255,.3);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; margin-bottom:10px;
+  }
+  .drawer-name { font-family:'Lora',serif; font-size:18px; font-weight:700; color:white; letter-spacing:-.3px; margin-bottom:2px; }
+  .drawer-sub  { font-size:11px; color:rgba(255,255,255,.6); font-weight:500; }
+
+  /* Drawer nav */
+  .drawer-nav { flex:1; overflow-y:auto; padding:10px 0; }
+
+  .drawer-section-label {
+    font-size:10px; font-weight:700; color:var(--soft);
+    letter-spacing:1px; text-transform:uppercase;
+    padding:10px 20px 4px;
+  }
+
+  .drawer-item {
+    display:flex; align-items:center; gap:13px;
+    padding:12px 20px; cursor:pointer;
+    transition:background .12s; border-left:3px solid transparent;
+  }
+  .drawer-item:hover { background:var(--bg); }
+  .drawer-item.active { background:var(--green-l); border-left-color:var(--green); }
+
+  .di-icon {
+    width:34px; height:34px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; flex-shrink:0;
+  }
+  .di-icon.green { background:var(--green-l); }
+  .di-icon.gold  { background:var(--gold-l); }
+  .di-icon.blue  { background:var(--blue-l); }
+  .di-icon.red   { background:var(--red-l); }
+
+  .di-info { flex:1; }
+  .di-name { font-size:13px; font-weight:600; color:var(--ink); }
+  .di-desc { font-size:11px; color:var(--soft); margin-top:1px; }
+  .di-arrow { font-size:12px; color:var(--soft); }
+
+  .drawer-item.active .di-name { color:var(--green); }
+
+  .drawer-divider { height:1px; background:var(--line2); margin:6px 0; }
+
+  /* ════════════════════════════════
+     ACCOUNT SUB-SCREENS
+     (slide in from right inside drawer area)
+  ════════════════════════════════ */
+  .ascreen {
+    position:absolute; inset:0;
+    background:var(--bg);
+    z-index:220;
+    transform:translateX(100%);
+    transition:transform .26s cubic-bezier(.4,0,.2,1);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .ascreen.open { transform:translateX(0); }
+
+  .ascreen-head {
+    background:var(--white);
+    padding:14px 16px 14px;
+    display:flex; align-items:center; gap:12px;
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .ascreen-back {
+    width:30px; height:30px; border-radius:8px;
+    border:1.5px solid var(--line); background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; cursor:pointer; transition:all .15s; flex-shrink:0;
+  }
+  .ascreen-back:hover { border-color:var(--green); color:var(--green); }
+  .ascreen-title { font-family:'Lora',serif; font-size:18px; font-weight:700; color:var(--ink); letter-spacing:-.3px; }
+
+  .ascreen-body { flex:1; overflow-y:auto; padding:16px 16px 40px; scrollbar-width:none; }
+  .ascreen-body::-webkit-scrollbar { display:none; }
+
+  /* ── Account screen shared components ── */
+  .a-slabel {
+    font-size:10px; font-weight:700; color:var(--soft);
+    letter-spacing:1px; text-transform:uppercase;
+    margin-bottom:8px; margin-top:4px;
+  }
+  .a-card {
+    background:var(--white); border:1px solid var(--line);
+    border-radius:12px; overflow:hidden; margin-bottom:14px;
+  }
+  .a-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 15px; border-bottom:1px solid var(--line2);
+    gap:10px;
+  }
+  .a-row:last-child { border-bottom:none; }
+  .a-row-left { flex:1; }
+  .a-row-label { font-size:13px; font-weight:500; color:var(--ink); margin-bottom:1px; }
+  .a-row-sub   { font-size:11px; color:var(--soft); }
+  .a-row-val   { font-size:13px; font-weight:600; color:var(--mid); flex-shrink:0; }
+  .a-row-val.green { color:var(--green); }
+
+  /* a-field */
+  .a-field-wrap { padding:12px 15px; border-bottom:1px solid var(--line2); }
+  .a-field-wrap:last-child { border-bottom:none; }
+  .a-flabel { font-size:11px; font-weight:600; color:var(--mid); margin-bottom:6px; display:block; }
+  .a-fwrap { position:relative; }
+  .a-fsym {
+    position:absolute; left:11px; top:50%;
+    transform:translateY(-50%);
+    font-size:14px; font-weight:700; color:var(--green);
+    pointer-events:none; z-index:1;
+  }
+  .a-finput {
+    width:100%; padding:10px 10px 10px 26px;
+    border:1.5px solid var(--line); border-radius:8px;
+    font-family:'Inter',sans-serif; font-size:15px; font-weight:600;
+    color:var(--ink); background:var(--bg); outline:none;
+    -webkit-appearance:none; transition:border-color .15s;
+  }
+  .a-finput:focus { border-color:var(--green); background:var(--white); }
+  .a-finput.bare { padding-left:10px; }
+  .a-finput::placeholder { color:#ccc; font-weight:400; font-size:13px; }
+
+  /* toggle inside account */
+  .a-toggle-inp { position:absolute; opacity:0; width:0; height:0; }
+  .a-toggle-track {
+    display:block; width:44px; height:26px;
+    background:#d0d0cc; border-radius:99px;
+    cursor:pointer; transition:background .22s; position:relative; flex-shrink:0;
+  }
+  .a-toggle-track::after {
+    content:''; position:absolute; top:3px; left:3px;
+    width:20px; height:20px; border-radius:50%; background:white;
+    box-shadow:0 1px 4px rgba(0,0,0,.18);
+    transition:transform .22s cubic-bezier(.4,0,.2,1);
+  }
+  .a-toggle-inp:checked + .a-toggle-track { background:var(--green); }
+  .a-toggle-inp:checked + .a-toggle-track::after { transform:translateX(18px); }
+
+  /* Wasiyyat rate selector */
+  .rate-chips { display:flex; gap:6px; flex-wrap:wrap; padding:10px 15px 14px; }
+  .rate-chip {
+    padding:5px 13px; border:1.5px solid var(--line);
+    border-radius:7px; font-size:12px; font-weight:600;
+    color:var(--soft); cursor:pointer; transition:all .15s;
+    background:var(--white); font-family:'Inter',sans-serif;
+  }
+  .rate-chip:hover { border-color:var(--green); color:var(--green); }
+  .rate-chip.on { background:var(--green); border-color:var(--green); color:white; }
+
+  /* Wasiyyat calculation preview */
+  .wasiyyat-preview {
+    background:var(--green-l); border:1px solid var(--green-m);
+    border-radius:10px; padding:13px 15px; margin-bottom:14px;
+  }
+  .wp-label { font-size:10px; font-weight:700; color:var(--green); letter-spacing:.8px; text-transform:uppercase; margin-bottom:8px; }
+  .wp-row   { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--green-m); }
+  .wp-row:last-child { border-bottom:none; }
+  .wp-name  { font-size:12px; color:var(--green); }
+  .wp-val   { font-size:12px; font-weight:700; color:var(--green); }
+
+  /* Reminder toggle rows */
+  .rem-row {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding:13px 15px; border-bottom:1px solid var(--line2); gap:12px;
+  }
+  .rem-row:last-child { border-bottom:none; }
+  .rem-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+  .rem-info { flex:1; }
+  .rem-name { font-size:13px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+  .rem-desc { font-size:11px; color:var(--soft); line-height:1.4; }
+  .rem-time-pick {
+    margin-top:8px; display:none;
+    gap:6px; flex-wrap:wrap;
+  }
+  .rem-time-pick.show { display:flex; animation:fadeUp .2s ease; }
+  .rtp-chip {
+    padding:4px 10px; border:1.5px solid var(--line);
+    border-radius:6px; font-size:11px; font-weight:600;
+    color:var(--soft); cursor:pointer; transition:all .15s;
+    background:var(--white); font-family:'Inter',sans-serif;
+  }
+  .rtp-chip:hover { border-color:var(--green); color:var(--green); }
+  .rtp-chip.on { background:var(--green); border-color:var(--green); color:white; }
+
+  .save-changes-btn {
+    width:100%; padding:13px; background:var(--green); color:white;
+    border:none; border-radius:10px; font-family:'Inter',sans-serif;
+    font-size:14px; font-weight:600; cursor:pointer; transition:all .15s;
+    margin-top:4px;
+  }
+  .save-changes-btn:hover { background:#235538; }
+  .save-changes-btn:active { transform:scale(.99); }
+
+/* ══════════════════════════════════════
+   FIXES & NEW STYLES
+══════════════════════════════════════ */
+
+/* FIX 2: Global top bar visible on ALL screens */
+.global-topbar {
+  background: var(--white);
+  padding: 10px 20px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.global-app-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--soft);
+  letter-spacing: 1.2px;
+}
+
+/* FIX 3: Remove screen title — sub bar instead */
+.screen-subbar {
+  background: var(--white);
+  padding: 10px 20px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.screen-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--soft);
+}
+
+/* Remove old topnav title styles from non-home screens */
+.topnav { display: none; }
+
+/* FIX 4: Remove year selector — handled in HTML */
+.year-selector { display: none !important; }
+
+/* FIX 5: Bottom nav — SVG icons, no emoji, highlight active cleanly */
+.bottomnav {
+  position: static !important;
+  background: var(--white);
+  border-top: 1px solid var(--line);
+  padding: 8px 6px 20px;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s;
+  flex: 1;
+}
+
+.bnav-item:hover { background: var(--bg); }
+
+.bnav-item.on {
+  background: var(--green-l);
+}
+
+.bnav-svg {
+  width: 20px;
+  height: 20px;
+  color: var(--soft);
+  transition: color .15s;
+  stroke: var(--soft);
+}
+
+.bnav-item.on .bnav-svg {
+  stroke: var(--green);
+  color: var(--green);
+}
+
+.bnav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--soft);
+  transition: color .15s;
+}
+
+.bnav-item.on .bnav-label {
+  color: var(--green);
+}
+
+/* Remove old active dot */
+.bnav-active-dot { display: none; }
+.bnav-icon { display: none; }
+
+/* FIX 6: Home hero — clean neutral card, no bold green */
+.home-hero {
+  background: var(--white);
+  padding: 16px 20px 20px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.hero-greeting { display: none; }
+.hero-name { display: none; }
+
+.hero-month {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--soft);
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.hero-due {
+  font-family: 'Lora', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.hero-sub {
+  font-size: 12px;
+  color: var(--soft);
+  margin-top: 3px;
+  margin-bottom: 14px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 8px;
+  margin-top: 0;
+}
+
+.hstat {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+}
+
+.hstat-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: 'Lora', serif;
+  letter-spacing: -.3px;
+}
+
+.hstat-lbl {
+  font-size: 10px;
+  color: var(--soft);
+  font-weight: 600;
+  margin-top: 2px;
+  letter-spacing: .3px;
+}
+
+/* FIX 1: Income source items with recurring toggle */
+.a-source-item {
+  border-bottom: 1px solid var(--line2);
+}
+
+.a-source-item:last-of-type {
+  border-bottom: none;
+}
+
+.a-src-name-inp {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+}
+
+.a-src-remove {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  color: var(--soft);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+
+.a-src-remove:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-l);
+}
+
+.a-recurring-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 15px 12px;
+  background: var(--bg);
+  gap: 10px;
+}
+
+.a-rec-left { flex: 1; }
+
+/* Chandas screen subbar with month pill */
+.screen-subbar .month-pill {
+  margin-top: 0;
+}
+
+/* ctabs now live below screen-subbar */
+.ctabs {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 0 18px 12px;
+}
+
+/* Pay now button inside qpay card */
+.pay-now-btn {
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+}
+
+/* ── MENU BUTTON (white background version) ── */
+.menu-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover {
+  border-color: var(--green);
+  background: var(--green-l);
+}
+
+.menu-line {
+  width: 14px;
+  height: 1.5px;
+  background: var(--ink);
+  border-radius: 2px;
+}
+
+/* Global topbar sits outside screens so always visible */
+.global-topbar {
+  position: relative;
+  z-index: 50;
+}
+
+/* ════════════════════════════════════════
+   ONBOARDING STYLES
+════════════════════════════════════════ */
+
+.ob-wrap {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ob-step {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.ob-step::-webkit-scrollbar { display: none; }
+.ob-step.active { display: flex; }
+
+/* Step 1 hero */
+.ob-hero {
+  background: var(--green);
+  padding: 48px 28px 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.ob-logo {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+.ob-title {
+  font-family: 'Lora', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -.4px;
+  margin-bottom: 8px;
+}
+.ob-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  line-height: 1.55;
+}
+
+/* Top bar for steps 2-3 */
+.ob-topbar {
+  background: var(--white);
+  padding: 12px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.ob-back {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+  flex-shrink: 0;
+}
+.ob-progress { flex: 1; }
+.ob-prog-bar {
+  height: 3px;
+  background: var(--line);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.ob-prog-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 99px;
+  transition: width .3s ease;
+}
+.ob-step-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--soft);
+  letter-spacing: .5px;
+}
+
+/* Body padding */
+.ob-body {
+  padding: 20px 20px 40px;
+  flex: 1;
+}
+
+.ob-section-title {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.3px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ob-optional {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--soft);
+  background: var(--bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.ob-section-sub {
+  font-size: 12px;
+  color: var(--soft);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+/* Cards */
+.ob-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 4px;
+}
+
+.ob-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mid);
+  margin-bottom: 8px;
+  letter-spacing: .2px;
+}
+.ob-hint {
+  font-size: 11px;
+  color: var(--soft);
+  margin-top: 6px;
+}
+
+.ob-field-wrap { position: relative; }
+.ob-sym {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  pointer-events: none;
+  z-index: 1;
+}
+.ob-input {
+  width: 100%;
+  padding: 12px 12px 12px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .15s, background .15s;
+  -webkit-appearance: none;
+}
+.ob-input:focus { border-color: var(--green); background: var(--white); }
+.ob-input::placeholder { color: #bbb; font-weight: 400; font-size: 14px; }
+.ob-num { padding-left: 30px; font-size: 18px; font-weight: 600; }
+
+/* Main CTA button */
+.ob-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background .15s;
+  letter-spacing: -.1px;
+}
+.ob-btn:hover { background: #235538; }
+
+.ob-skip {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--soft);
+  cursor: pointer;
+  margin-top: 6px;
+  transition: color .15s;
+}
+.ob-skip:hover { color: var(--mid); }
+
+.ob-error {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 8px;
+  font-weight: 500;
+  min-height: 16px;
+}
+
+/* Add source button */
+.ob-add-src {
+  width: 100%;
+  padding: 11px;
+  background: var(--white);
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 0;
+  transition: all .15s;
+}
+.ob-add-src:hover { border-color: var(--green); background: var(--green-l); }
+
+/* Source item */
+.ob-source-item {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.ob-src-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 0;
+}
+.ob-src-name {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 7px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+}
+.ob-src-name:focus { border-color: var(--green); background: var(--white); }
+.ob-src-rm {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  color: var(--soft);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.ob-src-rm:hover { border-color: var(--red); color: var(--red); background: var(--red-l); }
+
+.ob-rec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 0;
+  gap: 10px;
+  margin-top: 8px;
+  border-top: 1px solid var(--line2);
+}
+.ob-rec-label { font-size: 12px; font-weight: 500; color: var(--mid); }
+.ob-rec-desc  { font-size: 10px; color: var(--soft); margin-top: 2px; }
+
+/* Preview card */
+.ob-preview-card {
+  background: var(--green-l);
+  border: 1px solid var(--green-m);
+  border-radius: 10px;
+  padding: 13px 15px;
+  margin-top: 14px;
+  text-align: center;
+}
+.ob-preview-label { font-size: 10px; font-weight: 700; color: var(--green); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px; }
+.ob-preview-amt   { font-family: 'Lora', serif; font-size: 26px; font-weight: 700; color: var(--green); letter-spacing: -.5px; }
+.ob-preview-sub   { font-size: 11px; color: var(--green); opacity: .7; margin-top: 3px; }
+
+/* Pledge card elements */
+.ob-pledge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.ob-year-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  letter-spacing: .3px;
+}
+.ob-year-badge.green { background: var(--green-l); color: var(--green); }
+.ob-year-badge.gold  { background: var(--gold-l);  color: var(--gold); }
+.ob-monthly-line {
+  font-size: 11px;
+  color: var(--mid);
+  margin-top: 8px;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--line2);
+}
+
+/* Done screen */
+.ob-done-top {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 36px 24px 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.ob-done-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--green-l);
+  border: 2px solid var(--green-m);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 14px;
+  color: var(--green);
+  font-weight: 700;
+}
+.ob-done-title {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -.3px;
+}
+.ob-done-sub { font-size: 13px; color: var(--soft); }
+
+/* Summary card on done screen */
+.ob-summary-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.ob-sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line2);
+}
+.ob-sum-row.total {
+  background: var(--bg);
+}
+.ob-sum-row:last-child { border-bottom: none; }
+.ob-sum-name { font-size: 13px; color: var(--mid); }
+.ob-sum-val  { font-size: 13px; font-weight: 700; color: var(--ink); }
+.ob-sum-val.green { color: var(--green); }
+.ob-sum-val.gold  { color: var(--gold); }
+.ob-sum-divider   { height: 1px; background: var(--line); }
+
+.ob-privacy-note {
+  font-size: 11px;
+  color: var(--soft);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+/* Main app flex wrapper */
+#main-app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Hero greeting */
+.hero-greeting {
+  font-size: 13px;
+  color: var(--mid);
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ════════════════════════════════════════
+   PLEDGE UPDATE — inline edit
+════════════════════════════════════════ */
+
+.pledge-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.pledge-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.pledge-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pledge-update-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  background: var(--green-l);
+  border: 1.5px solid var(--green-m);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.pledge-update-btn:hover { background: var(--green-m); }
+.pledge-update-btn.active {
+  background: var(--red-l);
+  border-color: #f5c6c6;
+  color: var(--red);
+}
+
+/* Inline edit panel — hidden by default */
+.pledge-edit-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 16px;
+  border-top: 1px solid var(--line2);
+  background: var(--bg);
+  animation: fadeUp .18s ease;
+}
+.pledge-edit-panel.open { display: flex; }
+
+.pledge-edit-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--soft);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+.pledge-edit-field {
+  position: relative;
+}
+.pledge-edit-sym {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  pointer-events: none;
+  z-index: 1;
+}
+.pledge-edit-input {
+  width: 100%;
+  padding: 11px 11px 11px 28px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--white);
+  outline: none;
+  -webkit-appearance: none;
+  transition: border-color .15s;
+}
+.pledge-edit-input:focus { border-color: var(--green); }
+.pledge-edit-input::placeholder { color: #ccc; font-size: 15px; font-weight: 400; }
+
+.pledge-edit-preview {
+  font-size: 12px;
+  color: var(--mid);
+  padding: 8px 11px;
+  background: var(--white);
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+}
+
+.pledge-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+.pledge-cancel-btn {
+  flex: 1;
+  padding: 10px;
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--soft);
+  cursor: pointer;
+  transition: all .15s;
+}
+.pledge-cancel-btn:hover { border-color: var(--mid); color: var(--mid); }
+
+.pledge-save-btn {
+  flex: 2;
+  padding: 10px;
+  background: var(--green);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background .15s;
+}
+.pledge-save-btn:hover { background: #235538; }
+
+/* past-item for payment history */
+.past-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line2);
+  cursor: pointer;
+}
+.past-item:last-child { border-bottom: none; }
+.past-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.dot-paid    { background: var(--green); }
+.dot-partial { background: var(--amber); }
+.dot-missed  { background: var(--red); }
+.past-info { flex: 1; }
+.past-month { font-size: 13px; font-weight: 600; color: var(--ink); }
+.past-sub   { font-size: 11px; color: var(--soft); margin-top: 1px; }
+.past-right { text-align: right; }
+.past-amt   { font-size: 12px; font-weight: 600; }
+.past-amt.paid    { color: var(--green); }
+.past-amt.partial { color: var(--amber); }
+.past-amt.missed  { color: var(--red); }
+.past-status { font-size: 10px; color: var(--soft); margin-top: 1px; text-transform: uppercase; font-weight: 600; letter-spacing: .4px; }
+
+/* ── Wasiyyat mode: gold rate tag already defined, ensure dot turns gold too ── */
+.moosi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--gold-l);
+  border: 1px solid var(--gold-m);
+  padding: 2px 7px;
+  border-radius: 5px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+/* ════════════════════════════════════════
+   MONTH SCROLLER
+════════════════════════════════════════ */
+
+.month-scroller {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  border-bottom: 2px solid var(--line);
+  padding: 12px 16px;
+  flex-shrink: 0;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.ms-arrow {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid var(--green);
+  background: var(--green-l);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--green);
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.ms-arrow:hover:not(:disabled) { background: var(--green); color: white; }
+.ms-arrow:disabled { opacity: .25; cursor: default; border-color: var(--line); background: var(--bg); color: var(--soft); }
+
+.ms-centre {
+  flex: 1;
+  text-align: center;
+}
+.ms-month {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.4px;
+  line-height: 1.2;
+}
+.ms-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.ms-status.paid    { color: var(--green); }
+.ms-status.partial { color: var(--amber); }
+.ms-status.missed  { color: var(--red); }
+.ms-status.unpaid  { color: var(--soft); }
+.ms-status.future  { color: var(--soft); opacity: .5; }
+
+/* ── Month grid in summary ── */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 12px;
+}
+
+.mg-tile {
+  border-radius: 9px;
+  padding: 9px 4px;
+  text-align: center;
+  border: 1.5px solid transparent;
+  position: relative;
+  transition: opacity .15s;
+}
+.mg-tile.clickable { cursor: pointer; }
+.mg-tile.clickable:hover { opacity: .8; }
+
+.mg-name   { font-size: 11px; font-weight: 600; color: var(--ink); display: block; }
+.mg-status { font-size: 9px;  font-weight: 600; display: block; margin-top: 2px; letter-spacing: .3px; text-transform: uppercase; }
+
+.mg-paid     { background: var(--green-l); border-color: var(--green-m); }
+.mg-paid .mg-name   { color: var(--ink); }
+.mg-paid .mg-status { color: var(--green); }
+
+.mg-partial  { background: var(--amber-l); border-color: #fde68a; }
+.mg-partial .mg-status { color: var(--amber); }
+
+.mg-missed   { background: var(--red-l); border-color: #fecaca; }
+.mg-missed .mg-status { color: var(--red); }
+
+.mg-current  { background: var(--white); border-color: var(--green); }
+.mg-current .mg-name   { color: var(--green); }
+.mg-current .mg-status { color: var(--green); }
+
+.mg-upcoming { background: var(--bg); border-color: var(--line); opacity: .4; cursor: default; }
+.mg-upcoming .mg-status { color: var(--soft); }
+
+.now-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); position: absolute; top: 4px; right: 4px; }
+
+/* ════════════════════════════════════════
+   AUXILIARY / KHUDAM STYLES
+════════════════════════════════════════ */
+
+/* Blue colour variable already defined as --blue: #3a5fa0 */
+
+.slabel-badge.aux {
+  background: var(--blue-l);
+  color: var(--blue);
+}
+
+.ch-icon.blue {
+  background: var(--blue-l);
+}
+
+.rate-tag.blue {
+  background: var(--blue-l);
+  color: var(--blue);
+}
+
+.tr-val.blue {
+  color: var(--blue);
+}
+
+.ob-sum-val.blue {
+  color: var(--blue);
+}
+
+/* DOB input date style fix */
+input[type="date"].ob-input {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ── Chandas shared income bar (above all tabs) ── */
+.chandas-basis-bar {
+  background: var(--white);
+  padding: 10px 16px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.chandas-basis-bar .basis-card {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  margin-bottom: 0;
+}
+
+/* ── Chandas income card above tabs ── */
+.chandas-income-card {
+  background: var(--white);
+  margin: 12px 16px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 13px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.cic-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--soft);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.cic-amount {
+  font-family: 'Lora', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.5px;
+  line-height: 1.15;
+}
+
+.cic-annual {
+  font-size: 11px;
+  color: var(--soft);
+  margin-top: 1px;
+}
+
+.cic-annual span {
+  color: var(--mid);
+  font-weight: 600;
+}
+
+/* Tighten ctabs spacing to sit neatly under the card */
+.ctabs {
+  padding: 10px 16px 10px !important;
+}
+
+/* ════════════════════════════════════════
+   PLEDGE PAY PANEL
+════════════════════════════════════════ */
+
+.pledge-pay-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  background: var(--green);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.pledge-pay-btn:hover { background: #235538; }
+.pledge-pay-btn.active {
+  background: var(--red-l);
+  color: var(--red);
+  border: 1.5px solid #f5c6c6;
+}
+
+.pledge-pay-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 16px;
+  border-top: 1px solid var(--line2);
+  background: var(--bg);
+  animation: fadeUp .18s ease;
+}
+.pledge-pay-panel.open { display: flex; }
+
+.pledge-pay-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pledge-pay-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer;
+  background: var(--white);
+  transition: all .15s;
+}
+.pledge-pay-option:has(input:checked) {
+  border-color: var(--green);
+  background: var(--green-l);
+}
+.pledge-pay-option input[type="radio"] {
+  margin-top: 2px;
+  accent-color: var(--green);
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+
+.ppo-content { flex: 1; }
+.ppo-title  { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.ppo-amount { font-family: 'Lora', serif; font-size: 18px; font-weight: 700; color: var(--green); letter-spacing: -.3px; margin-bottom: 2px; }
+.ppo-sub    { font-size: 11px; color: var(--soft); }
+
+/* ── SVG icon rendering ── */
+.ch-icon svg,
+.qpay-icon svg,
+.br-icon svg,
+.pc-row-icon svg,
+.rem-icon svg,
+.proj-icon svg,
+.di-icon svg,
+.drawer-avatar svg,
+.ob-logo svg,
+.ob-sum-name svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Icon containers need to pass colour to SVG stroke */
+.ch-icon.green svg  { stroke: var(--green); }
+.ch-icon.gold  svg  { stroke: var(--gold); }
+.ch-icon.blue  svg  { stroke: var(--blue); }
+.di-icon.green svg  { stroke: var(--green); }
+.di-icon.gold  svg  { stroke: var(--gold); }
+.di-icon.blue  svg  { stroke: var(--blue); }
+.di-icon.red   svg  { stroke: var(--red); }
+
+.qpay-icon      { display:flex; align-items:center; justify-content:center; width:20px; flex-shrink:0; }
+.qpay-icon svg  { stroke: var(--mid); }
+.br-icon        { display:flex; align-items:center; }
+.pc-row-icon    { display:flex; align-items:center; }
+.rem-icon       { display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.proj-icon      { display:flex; align-items:center; flex-shrink:0; }
+.ob-logo        { display:flex; align-items:center; justify-content:center; }
+.ob-logo svg    { stroke: white; width: 48px; height: 48px; stroke-width: 1.5; }
+.ob-sum-name    { display:flex; align-items:center; gap: 6px; }
+.ob-sum-name svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.drawer-avatar svg { stroke: white; width: 24px; height: 24px; }
+
+/* ── Onboarding choice cards (Wasiyyat yes/no) ── */
+.ob-choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--white);
+  transition: all .15s;
+}
+.ob-choice-card:has(input:checked) {
+  border-color: var(--green);
+  background: var(--green-l);
+}
+.ob-choice-card input[type="radio"] {
+  margin-top: 2px;
+  accent-color: var(--green);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+.ob-choice-content { flex: 1; }
+.ob-choice-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.ob-choice-sub   { font-size: 11px; color: var(--soft); }
+
+/* ════════════════════════════════════════
+   PAYMENT CALENDAR
+════════════════════════════════════════ */
+
+.pay-calendar {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 14px 8px;
+  flex-shrink: 0;
+}
+
+.cal-dow-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+.cal-dow-row span {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--soft);
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  padding: 2px 0;
+}
+
+.cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+  transition: background .12s;
+  user-select: none;
+}
+.cal-day.empty    { cursor: default; }
+.cal-day.future   { color: var(--soft); opacity: .45; cursor: default; }
+.cal-day.today::after {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.cal-day.selected {
+  background: var(--green);
+  color: white;
+  font-weight: 700;
+}
+.cal-day.paid-day {
+  background: var(--green-l);
+  color: var(--green);
+  font-weight: 700;
+}
+.cal-day.partial-day {
+  background: var(--amber-l);
+  color: var(--amber);
+  font-weight: 700;
+}
+.cal-day.missed-day {
+  background: var(--red-l);
+  color: var(--red);
+  font-weight: 700;
+}
+.cal-day.selected.paid-day,
+.cal-day.selected.partial-day,
+.cal-day.selected.missed-day {
+  background: var(--green);
+  color: white;
+}
+.cal-day:hover:not(.empty):not(.future) {
+  background: var(--bg);
+}
+.cal-day.selected:hover {
+  background: var(--green);
+}
+
+.cal-selected-label {
+  font-size: 11px;
+  color: var(--soft);
+  text-align: center;
+  margin-top: 6px;
+  min-height: 16px;
+  font-weight: 500;
+}
+
+/* ── Update payment bar ── */
+.update-payment-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.upb-text {
+  font-size: 13px;
+  color: var(--mid);
+}
+.upb-text span { font-weight: 700; color: var(--ink); }
+.upb-btn {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-l);
+  border: 1.5px solid var(--green-m);
+  border-radius: 7px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .15s;
+}
+.upb-btn:hover { background: var(--green); color: white; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ══ ONBOARDING ══ -->
+  <div id="onboarding" class="ob-wrap">
+
+    <!-- Step 1: Welcome -->
+    <div class="ob-step active" id="ob-step-1">
+      <div class="ob-hero">
+        <div class="ob-logo"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></div>
+        <div class="ob-title">Chanda Tracker</div>
+        <div class="ob-subtitle">Track your religious financial obligations simply and honestly.</div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-card">
+          <label class="ob-label">Your name</label>
+          <input class="ob-input" id="ob-name" type="text" placeholder="e.g. Ahmed" autocomplete="off">
+        </div>
+        <div class="ob-card" style="margin-top:12px;">
+          <label class="ob-label">Date of birth</label>
+          <input class="ob-input" id="ob-dob" type="date" style="padding:11px 12px;font-size:14px;">
+          <div class="ob-hint">Used to determine your chanda category. Stored only on your device.</div>
+        </div>
+        <button class="ob-btn" onclick="obNext(1)">Get Started →</button>
+        <div class="ob-error" id="ob-err-1"></div>
+      </div>
+    </div>
+
+    <!-- Step 2: Income -->
+    <div class="ob-step" id="ob-step-2">
+      <div class="ob-topbar">
+        <button class="ob-back" onclick="obBack(2)">← Back</button>
+        <div class="ob-progress">
+          <div class="ob-prog-bar"><div class="ob-prog-fill" style="width:25%"></div></div>
+          <span class="ob-step-label">Step 1 of 4</span>
+        </div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-section-title">Your Income</div>
+        <div class="ob-section-sub">Enter your monthly income so we can calculate your chandas automatically.</div>
+        <div class="ob-card">
+          <label class="ob-label">Monthly net income (after tax)</label>
+          <div class="ob-field-wrap"><span class="ob-sym">£</span><input class="ob-input ob-num" id="ob-primary" type="number" placeholder="0.00" inputmode="decimal" oninput="obCalcPreview()"></div>
+        </div>
+        <div class="ob-section-title" style="margin-top:16px;">Other Sources <span class="ob-optional">optional</span></div>
+        <div class="ob-section-sub">Rental, business, freelance or any other regular income.</div>
+        <div id="ob-sources-list"></div>
+        <button class="ob-add-src" onclick="obAddSource()">＋ Add income source</button>
+        <button class="ob-btn" onclick="obNext(2)">Continue →</button>
+        <div class="ob-error" id="ob-err-2"></div>
+      </div>
+    </div>
+
+
+    <!-- Step 3: Wasiyyat -->
+    <div class="ob-step" id="ob-step-3">
+      <div class="ob-topbar">
+        <button class="ob-back" onclick="obBack(3)">← Back</button>
+        <div class="ob-progress">
+          <div class="ob-prog-bar"><div class="ob-prog-fill" style="width:50%"></div></div>
+          <span class="ob-step-label">Step 2 of 4</span>
+        </div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-section-title">Wasiyyat / Moosi</div>
+        <div class="ob-section-sub">Are you a member of the Nizam-e-Wasiyyat? If yes, Wasiyyat replaces Chanda Aam in all calculations.</div>
+        <div class="ob-card">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <label class="ob-choice-card" id="ob-wasiyyat-no-card">
+              <input type="radio" name="ob-wasiyyat" value="no" checked onchange="obWasiyyatChange()">
+              <div class="ob-choice-content">
+                <div class="ob-choice-title">No — I pay standard Chanda Aam</div>
+                <div class="ob-choice-sub">6.25% of monthly income</div>
+              </div>
+            </label>
+            <label class="ob-choice-card" id="ob-wasiyyat-yes-card">
+              <input type="radio" name="ob-wasiyyat" value="yes" onchange="obWasiyyatChange()">
+              <div class="ob-choice-content">
+                <div class="ob-choice-title">Yes — I am a Moosi member</div>
+                <div class="ob-choice-sub">Wasiyyat rate replaces Chanda Aam</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <!-- Rate chips — shown only if yes -->
+        <div id="ob-wasiyyat-rate-section" style="display:none;">
+          <div class="ob-section-title" style="margin-top:14px;">Your Wasiyyat Rate</div>
+          <div class="ob-section-sub">Enter the rate agreed with your Jama'at office (max 33%).</div>
+          <div class="ob-card">
+            <div class="ob-wasiyyat-rate-row">
+              <div class="ob-field-wrap" style="flex:1;">
+                <input class="ob-input ob-num" id="ob-wasiyyat-rate-input" type="number" placeholder="10" min="1" max="33" step="0.5" inputmode="decimal" value="10" oninput="obWasiyyatRateInput()">
+                <span class="ob-sym" style="position:absolute;right:12px;left:auto;font-size:14px;color:var(--mid);">%</span>
+              </div>
+            </div>
+            <div id="ob-wasiyyat-rate-error" style="font-size:11px;color:var(--red);margin-top:6px;display:none;">Rate cannot exceed 33%</div>
+            <div style="margin-top:10px;font-size:12px;color:var(--soft);">
+              Monthly Wasiyyat: <strong id="ob-wasiyyat-preview" style="color:var(--gold);">£ 0.00</strong>
+            </div>
+          </div>
+        </div>
+        <button class="ob-btn" onclick="obNext(3)" style="margin-top:18px;">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Pledges -->
+    <div class="ob-step" id="ob-step-4">
+      <div class="ob-topbar">
+        <button class="ob-back" onclick="obBack(4)">← Back</button>
+        <div class="ob-progress">
+          <div class="ob-prog-bar"><div class="ob-prog-fill" style="width:75%"></div></div>
+          <span class="ob-step-label">Step 3 of 4</span>
+        </div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-section-title">Annual Pledges</div>
+        <div class="ob-section-sub">Set your giving goals. You can skip and set these later in Settings.</div>
+        <div class="ob-card">
+          <div class="ob-pledge-header">
+            <div><div class="ob-label">Tahrik-e-Jadid</div><div class="ob-hint">Annual pledge · Nov 1 → Oct 31</div></div>
+            <span class="ob-year-badge green">Nov–Oct</span>
+          </div>
+          <div class="ob-field-wrap" style="margin-top:10px;"><span class="ob-sym">£</span><input class="ob-input ob-num" id="ob-tahrik" type="number" placeholder="0.00" inputmode="decimal" oninput="obCalcPledge()"></div>
+          <div class="ob-monthly-line" id="ob-tahrik-mo" style="display:none;">Monthly instalment: <strong id="ob-tahrik-mo-val">£ 0.00</strong></div>
+        </div>
+        <div class="ob-card" style="margin-top:12px;">
+          <div class="ob-pledge-header">
+            <div><div class="ob-label">Waqf-e-Jadid</div><div class="ob-hint">Annual pledge · Jan 1 → Dec 31</div></div>
+            <span class="ob-year-badge gold">Jan–Dec</span>
+          </div>
+          <div class="ob-field-wrap" style="margin-top:10px;"><span class="ob-sym">£</span><input class="ob-input ob-num" id="ob-waqf" type="number" placeholder="0.00" inputmode="decimal" oninput="obCalcPledge()"></div>
+          <div class="ob-monthly-line" id="ob-waqf-mo" style="display:none;">Monthly instalment: <strong id="ob-waqf-mo-val">£ 0.00</strong></div>
+        </div>
+        <button class="ob-btn" onclick="obNext(4)" style="margin-top:18px;">Continue →</button>
+        <button class="ob-skip" onclick="obSkipPledges()">Skip — set pledges later</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Done -->
+    <div class="ob-step" id="ob-step-5">
+      <div class="ob-done-top">
+        <div class="ob-done-icon">✓</div>
+        <div class="ob-done-title">You're all set, <span id="ob-done-name">—</span>!</div>
+        <div class="ob-done-sub">Your monthly chanda breakdown.</div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-summary-card">
+          <div class="ob-sum-row"><span class="ob-sum-name" id="ob-sum-aam-label">Chanda Aam</span><span class="ob-sum-val green" id="ob-sum-aam">£ 0.00</span></div>
+          <div class="ob-sum-row"><span class="ob-sum-name">Jalsa Salana</span><span class="ob-sum-val gold" id="ob-sum-jalsa">£ 0.00 / yr</span></div>
+          <div class="ob-sum-row"><span class="ob-sum-name">Tahrik-e-Jadid</span><span class="ob-sum-val green" id="ob-sum-tahrik">£ 0.00 / mo</span></div>
+          <div class="ob-sum-row"><span class="ob-sum-name">Waqf-e-Jadid</span><span class="ob-sum-val gold" id="ob-sum-waqf">£ 0.00 / mo</span></div>
+          <div class="ob-sum-row" id="ob-sum-khudam-row" style="display:none;"><span class="ob-sum-name">Khudam Chanda</span><span class="ob-sum-val blue" id="ob-sum-khudam">£ 0.00 / mo</span></div>
+          <div class="ob-sum-row" id="ob-sum-ijtema-row" style="display:none;"><span class="ob-sum-name">Khudam Ijtema</span><span class="ob-sum-val blue" id="ob-sum-ijtema">£ 0.00 / mo</span></div>
+          <div class="ob-sum-divider"></div>
+          <div class="ob-sum-row total"><span class="ob-sum-name" style="font-weight:700;color:var(--ink);">Total / month</span><span class="ob-sum-val" id="ob-sum-total">£ 0.00</span></div>
+        </div>
+        <div class="ob-privacy-note"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> All data stored only on your device.</div>
+        <button class="ob-btn" onclick="obFinish()">Go to Dashboard →</button>
+      </div>
+    </div>
+
+  </div><!-- /onboarding -->
+
+  <!-- ══ MAIN APP ══ -->
+  <div id="main-app" style="display:none;flex-direction:column;flex:1;overflow:hidden;height:100%;">
+
+    <!-- Global top bar -->
+    <div class="global-topbar">
+      <div class="menu-btn" onclick="openDrawer()">
+        <div class="menu-line"></div><div class="menu-line"></div><div class="menu-line"></div>
+      </div>
+      <span class="global-app-name">CHANDA TRACKER</span>
+      <div style="width:34px;"></div>
+    </div>
+
+    <!-- ══ HOME ══ -->
+    <div class="screen active" id="screen-home">
+      <div class="home-hero">
+        <div class="hero-greeting" id="hero-greeting">Assalamu Alaikum</div>
+        <div class="hero-month" id="hero-month">—</div>
+        <div class="hero-due" id="hero-due">£ 0.00</div>
+        <div class="hero-sub">Total chandas this month</div>
+        <div class="hero-stats">
+          <div class="hstat"><div class="hstat-val" id="stat-year-pct">0%</div><div class="hstat-lbl">Year paid</div></div>
+          <div class="hstat"><div class="hstat-val" id="stat-outstanding">£ 0</div><div class="hstat-lbl">Outstanding</div></div>
+          <div class="hstat"><div class="hstat-val" id="stat-months">0/12</div><div class="hstat-lbl">Months paid</div></div>
+        </div>
+      </div>
+      <div class="sbody">
+        <div class="qpay-card">
+          <div class="qpay-header"><span class="qpay-title" id="home-month-title">—</span><span class="qpay-month">Monthly chandas</span></div>
+          <div class="qpay-row" id="home-aam-row"><div class="qpay-left"><span class="qpay-name" id="home-aam-name">Chanda Aam</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-aam">£ 0.00</span><span class="qpay-status qs-due">Due</span></div></div>
+          <div class="qpay-row" id="home-jalsa-row"><div class="qpay-left"><span class="qpay-name">Jalsa Salana</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-jalsa">£ 0.00</span><span class="qpay-status qs-due">Due</span></div></div>
+          <div class="qpay-row" id="home-tahrik-row"><div class="qpay-left"><span class="qpay-name">Tahrik-e-Jadid</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-tahrik">£ 0.00</span><span class="qpay-status qs-due">Due</span></div></div>
+          <div class="qpay-row" id="home-waqf-row"><div class="qpay-left"><span class="qpay-name">Waqf-e-Jadid</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-waqf">£ 0.00</span><span class="qpay-status qs-due">Due</span></div></div>
+          <div class="qpay-row" id="home-khudam-row" style="display:none;"><div class="qpay-left"><span class="qpay-name" style="color:var(--blue);">Khudam Chanda</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-khudam">£ 0.00</span><span class="qpay-status" style="background:var(--blue-l);color:var(--blue);">Due</span></div></div>
+          <div class="qpay-row" id="home-ijtema-row" style="display:none;"><div class="qpay-left"><span class="qpay-name" style="color:var(--blue);">Khudam Ijtema</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-ijtema">£ 0.00</span><span class="qpay-status" style="background:var(--blue-l);color:var(--blue);">Due</span></div></div>
+          <div class="qpay-total"><span class="qt-label">Grand Total / Month</span><span class="qt-amt" id="home-total">£ 0.00</span></div>
+          <button class="pay-now-btn" onclick="goTo('payments')">Log Payment →</button>
+        </div>
+        <div class="slabel">Year Progress</div>
+        <div class="year-ring-card">
+          <div class="ring-wrap">
+            <svg class="ring-svg" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="35"/><circle class="ring-fill" id="ring-fill-el" cx="40" cy="40" r="35"/></svg>
+            <div class="ring-label"><span class="ring-pct" id="ring-pct">0%</span><span class="ring-sub">PAID</span></div>
+          </div>
+          <div class="ring-info">
+            <div class="ri-title">Chanda Year</div>
+            <div class="ri-paid" id="ring-paid">£ 0.00 paid</div>
+            <div class="ri-of" id="ring-of">of £ 0.00 annual total</div>
+            <div class="ri-remaining" id="ring-remaining">£ 0.00 remaining</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHANDAS ══ -->
+    <div class="screen" id="screen-chandas">
+      <div class="screen-subbar"><div class="month-pill"><div class="mp-dot"></div><span class="mp-text" id="chandas-month-pill">—</span></div></div>
+      <!-- Income card -->
+      <div class="chandas-income-card">
+        <div class="cic-label">Monthly Income</div>
+        <div class="cic-amount" id="basis-total">£ 0.00</div>
+        <div class="cic-annual">Annual: <span id="basis-annual">£ 0.00</span></div>
+      </div>
+      <div class="ctabs">
+        <button class="ctab on" onclick="switchCTab('lazmi',this)">Compulsory</button>
+        <button class="ctab" onclick="switchCTab('temp',this)">Voluntary</button>
+        <button class="ctab" onclick="switchCTab('aux',this)">Auxiliary</button>
+      </div>
+      <div class="sbody">
+
+        <!-- COMPULSORY -->
+        <div class="ctab-panel on" id="ctab-lazmi">
+          <div class="slabel"><span id="lazmi-section-label">Lazmi Chandas</span> <span class="slabel-badge lazmi">Obligatory</span></div>
+          <div class="chanda-card">
+            <div class="chanda-row"><div class="ch-info"><div class="ch-name" id="ch-aam-name">Chanda Aam</div><div class="ch-desc"><span class="rate-tag green" id="ch-aam-rate">6.25%</span> <span id="ch-aam-desc">of monthly income</span></div></div><div class="ch-amounts"><div class="ch-primary" id="ch-aam">£ 0.00</div><div class="ch-secondary">per month</div></div></div>
+            <div class="chanda-row"><div class="ch-info"><div class="ch-name">Jalsa Salana</div><div class="ch-desc"><span class="rate-tag gold">0.83%</span> of annual income</div></div><div class="ch-amounts"><div class="ch-primary" id="ch-jalsa-ann">£ 0.00</div><div class="ch-secondary">per year · <span id="ch-jalsa-mo">£ 0.00</span>/mo</div></div></div>
+          </div>
+          <div class="total-card">
+            <div class="total-top"><div class="total-label">Compulsory Total</div><div class="total-main" id="ch-lazmi-total">£ 0.00</div><div class="total-sub-t">Monthly obligation</div></div>
+            <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--green)"></div><span class="tr-name" id="tr-aam-name">Chanda Aam / month</span></div><span class="tr-val green" id="ch-tr-aam">£ 0.00</span></div>
+            <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--gold)"></div><span class="tr-name">Jalsa Salana / month</span></div><span class="tr-val gold" id="ch-tr-jalsa">£ 0.00</span></div>
+            <div class="total-row highlight"><div class="tr-left"><div class="tr-dot" style="background:var(--ink)"></div><span class="tr-name bold">Total / month</span></div><span class="tr-val" id="ch-tr-lazmi">£ 0.00</span></div>
+          </div>
+        </div>
+
+        <!-- VOLUNTARY -->
+        <div class="ctab-panel" id="ctab-temp">
+          <div class="slabel">Voluntary <span class="slabel-badge temp">Pledges</span></div>
+          <!-- Tahrik -->
+          <div class="pledge-card">
+            <div class="pledge-row">
+              <div class="ch-info"><div class="ch-name">Tahrik-e-Jadid</div><div class="ch-desc">Nov 1 → Oct 31</div></div>
+              <div class="pledge-right"><div class="ch-primary" id="ch-tahrik">£ 0.00</div><div class="ch-secondary">per month</div></div>
+              <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="pledge-update-btn" id="btn-update-tahrik" onclick="togglePledgeEdit('tahrik')" title="Update pledge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="pledge-pay-btn" id="btn-pay-tahrik" onclick="togglePledgePay('tahrik')" title="Log payment">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pledge-edit-panel" id="pledge-edit-tahrik">
+              <div class="pledge-edit-label">Annual pledge amount</div>
+              <div class="pledge-edit-field"><span class="pledge-edit-sym">£</span><input class="pledge-edit-input" id="pledge-input-tahrik" type="number" placeholder="0.00" inputmode="decimal" oninput="pledgeLivePreview('tahrik')"></div>
+              <div class="pledge-edit-preview" id="pledge-preview-tahrik" style="display:none;">Monthly instalment: <strong id="pledge-mo-tahrik">£ 0.00</strong></div>
+              <div class="pledge-edit-actions"><button class="pledge-cancel-btn" onclick="togglePledgeEdit('tahrik')">Cancel</button><button class="pledge-save-btn" onclick="savePledge('tahrik')">Save</button></div>
+            </div>
+            <div class="pledge-pay-panel" id="pledge-pay-tahrik">
+              <div class="pledge-edit-label">Log Tahrik-e-Jadid Payment</div>
+              <div class="pledge-pay-options">
+                <label class="pledge-pay-option"><input type="radio" name="pledge-pay-type-tahrik" value="monthly" checked onchange="pledgePayTypeChange('tahrik')"><div class="ppo-content"><div class="ppo-title">Monthly instalment</div><div class="ppo-amount" id="pledge-pay-mo-tahrik">£ 0.00</div><div class="ppo-sub">Records for current month only</div></div></label>
+                <label class="pledge-pay-option"><input type="radio" name="pledge-pay-type-tahrik" value="annual" onchange="pledgePayTypeChange('tahrik')"><div class="ppo-content"><div class="ppo-title">Full annual pledge</div><div class="ppo-amount" id="pledge-pay-ann-tahrik">£ 0.00</div><div class="ppo-sub">Marks all remaining months as paid</div></div></label>
+              </div>
+              <div class="pledge-edit-actions" style="margin-top:10px;"><button class="pledge-cancel-btn" onclick="togglePledgePay('tahrik')">Cancel</button><button class="pledge-save-btn" onclick="savePledgePayment('tahrik')">Save Payment</button></div>
+            </div>
+          </div>
+          <!-- Waqf -->
+          <div class="pledge-card">
+            <div class="pledge-row">
+              <div class="ch-info"><div class="ch-name">Waqf-e-Jadid</div><div class="ch-desc">Jan 1 → Dec 31</div></div>
+              <div class="pledge-right"><div class="ch-primary" id="ch-waqf">£ 0.00</div><div class="ch-secondary">per month</div></div>
+              <div style="display:flex;gap:6px;flex-shrink:0;">
+                <button class="pledge-update-btn" id="btn-update-waqf" onclick="togglePledgeEdit('waqf')" title="Update pledge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="pledge-pay-btn" id="btn-pay-waqf" onclick="togglePledgePay('waqf')" title="Log payment">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="pledge-edit-panel" id="pledge-edit-waqf">
+              <div class="pledge-edit-label">Annual pledge amount</div>
+              <div class="pledge-edit-field"><span class="pledge-edit-sym">£</span><input class="pledge-edit-input" id="pledge-input-waqf" type="number" placeholder="0.00" inputmode="decimal" oninput="pledgeLivePreview('waqf')"></div>
+              <div class="pledge-edit-preview" id="pledge-preview-waqf" style="display:none;">Monthly instalment: <strong id="pledge-mo-waqf">£ 0.00</strong></div>
+              <div class="pledge-edit-actions"><button class="pledge-cancel-btn" onclick="togglePledgeEdit('waqf')">Cancel</button><button class="pledge-save-btn" onclick="savePledge('waqf')">Save</button></div>
+            </div>
+            <div class="pledge-pay-panel" id="pledge-pay-waqf">
+              <div class="pledge-edit-label">Log Waqf-e-Jadid Payment</div>
+              <div class="pledge-pay-options">
+                <label class="pledge-pay-option"><input type="radio" name="pledge-pay-type-waqf" value="monthly" checked onchange="pledgePayTypeChange('waqf')"><div class="ppo-content"><div class="ppo-title">Monthly instalment</div><div class="ppo-amount" id="pledge-pay-mo-waqf">£ 0.00</div><div class="ppo-sub">Records for current month only</div></div></label>
+                <label class="pledge-pay-option"><input type="radio" name="pledge-pay-type-waqf" value="annual" onchange="pledgePayTypeChange('waqf')"><div class="ppo-content"><div class="ppo-title">Full annual pledge</div><div class="ppo-amount" id="pledge-pay-ann-waqf">£ 0.00</div><div class="ppo-sub">Marks all remaining months as paid</div></div></label>
+              </div>
+              <div class="pledge-edit-actions" style="margin-top:10px;"><button class="pledge-cancel-btn" onclick="togglePledgePay('waqf')">Cancel</button><button class="pledge-save-btn" onclick="savePledgePayment('waqf')">Save Payment</button></div>
+            </div>
+          </div>
+          <div class="total-card">
+            <div class="total-top"><div class="total-label">Voluntary Total</div><div class="total-main" id="ch-temp-total">£ 0.00</div><div class="total-sub-t">Combined monthly pledges</div></div>
+            <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--green)"></div><span class="tr-name">Tahrik-e-Jadid</span></div><span class="tr-val green" id="ch-tr-tahrik">£ 0.00</span></div>
+            <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--gold)"></div><span class="tr-name">Waqf-e-Jadid</span></div><span class="tr-val gold" id="ch-tr-waqf">£ 0.00</span></div>
+            <div class="total-row highlight"><div class="tr-left"><div class="tr-dot" style="background:var(--ink)"></div><span class="tr-name bold">Total / month</span></div><span class="tr-val" id="ch-tr-temp">£ 0.00</span></div>
+          </div>
+        </div>
+
+        <!-- AUXILIARY -->
+        <div class="ctab-panel" id="ctab-aux">
+          <div id="aux-khudam-section">
+            <div class="slabel">Khudam ul Ahmadiyya <span class="slabel-badge aux">Ages 15–40</span></div>
+            <div class="chanda-card">
+              <div class="chanda-row"><div class="ch-info"><div class="ch-name">Khudam Chanda</div><div class="ch-desc"><span class="rate-tag blue">1%</span> of annual income · Nov–Oct</div></div><div class="ch-amounts"><div class="ch-primary" id="ch-khudam">£ 0.00</div><div class="ch-secondary">per month</div><div class="ch-secondary" id="ch-khudam-ann" style="color:var(--blue);font-size:10px;margin-top:1px;">£ 0.00 / yr</div></div></div>
+              <div class="chanda-row"><div class="ch-info"><div class="ch-name">Khudam Ijtema</div><div class="ch-desc"><span class="rate-tag blue">0.5%</span> of annual income · Nov–Oct</div></div><div class="ch-amounts"><div class="ch-primary" id="ch-ijtema">£ 0.00</div><div class="ch-secondary">per month</div><div class="ch-secondary" id="ch-ijtema-ann" style="color:var(--blue);font-size:10px;margin-top:1px;">£ 0.00 / yr</div></div></div>
+            </div>
+            <div class="total-card">
+              <div class="total-top"><div class="total-label">Auxiliary Total</div><div class="total-main" id="ch-aux-total">£ 0.00</div><div class="total-sub-t">Monthly auxiliary chandas</div></div>
+              <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--blue)"></div><span class="tr-name">Khudam Chanda / month</span></div><span class="tr-val blue" id="ch-tr-khudam">£ 0.00</span></div>
+              <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--blue);opacity:.6"></div><span class="tr-name">Khudam Ijtema / month</span></div><span class="tr-val blue" id="ch-tr-ijtema">£ 0.00</span></div>
+              <div class="total-row highlight"><div class="tr-left"><div class="tr-dot" style="background:var(--ink)"></div><span class="tr-name bold">Total / month</span></div><span class="tr-val" id="ch-tr-aux">£ 0.00</span></div>
+            </div>
+          </div>
+          <div id="aux-na-section" style="display:none;">
+            <div style="background:var(--blue-l);border:1px solid #c7d7f5;border-radius:12px;padding:20px 18px;text-align:center;margin-top:4px;">
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;">Not applicable</div>
+              <div style="font-size:12px;color:var(--soft);line-height:1.6;">Auxiliary chandas for Khudam ul Ahmadiyya apply to male members aged <strong>15–40</strong>.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ PAYMENTS ══ -->
+    <div class="screen" id="screen-payments">
+
+      <!-- Month nav bar -->
+      <div class="month-scroller">
+        <button class="ms-arrow" id="ms-prev" onclick="changeMonth(-1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="ms-centre">
+          <div class="ms-month" id="ms-month-label">—</div>
+          <div class="ms-status" id="ms-month-status">Unpaid</div>
+        </div>
+        <button class="ms-arrow" id="ms-next" onclick="changeMonth(1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+
+      <div class="sbody">
+        <div class="card">
+          <div class="curr-month-header">
+            <div class="cm-top"><div><div class="cm-month" id="pay-month-title">—</div><div class="cm-sub" id="pay-cm-sub">—</div></div><span class="curr-status-badge csb-unpaid" id="currBadge">Unpaid</span></div>
+          </div>
+          <div class="cm-breakdown">
+            <div class="cm-row"><span class="cm-row-name" id="pay-aam-name">Chanda Aam</span><span class="cm-row-amt" id="pay-aam">£ 0.00</span></div>
+            <div class="cm-row"><span class="cm-row-name">Jalsa Salana</span><span class="cm-row-amt" id="pay-jalsa">£ 0.00</span></div>
+            <div class="cm-row"><span class="cm-row-name">Tahrik-e-Jadid</span><span class="cm-row-amt" id="pay-tahrik">£ 0.00</span></div>
+            <div class="cm-row"><span class="cm-row-name">Waqf-e-Jadid</span><span class="cm-row-amt" id="pay-waqf">£ 0.00</span></div>
+            <div class="cm-row" id="pay-khudam-row" style="display:none;"><span class="cm-row-name" style="color:var(--blue);">Khudam Chanda</span><span class="cm-row-amt" id="pay-khudam">£ 0.00</span></div>
+            <div class="cm-row" id="pay-ijtema-row" style="display:none;"><span class="cm-row-name" style="color:var(--blue);">Khudam Ijtema</span><span class="cm-row-amt" id="pay-ijtema">£ 0.00</span></div>
+            <div class="cm-total-row"><span class="cm-total-label">Total Due</span><span class="cm-total-amt" id="pay-total">£ 0.00</span></div>
+          </div>
+          <div class="pay-action">
+            <!-- Shown when month already has a record -->
+            <div class="update-payment-bar" id="update-payment-bar" style="display:none;">
+              <div class="upb-text">Already logged — <span id="upb-status-text">Paid</span></div>
+              <button class="upb-btn" onclick="resetMonthPayment()">Change →</button>
+            </div>
+            <div id="pay-log-section">
+            <div class="pay-status-row">
+              <button class="ps-btn" id="btnPaid" onclick="setStatus('paid')">✓ Paid</button>
+              <button class="ps-btn" id="btnPartial" onclick="setStatus('partial')">◑ Partial</button>
+              <button class="ps-btn" id="btnMissed" onclick="setStatus('missed')">✕ Missed</button>
+            </div>
+            <div class="partial-wrap" id="partialWrap">
+              <div class="partial-header">Which chandas did you pay?</div>
+              <div class="partial-chanda-row" id="pc-aam" onclick="toggleChanda('aam')"><div class="pc-row-left"><div><div class="pc-row-name" id="pc-aam-name">Chanda Aam</div><div class="pc-row-amt" id="pc-aam-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-jalsa" onclick="toggleChanda('jalsa')"><div class="pc-row-left"><div><div class="pc-row-name">Jalsa Salana</div><div class="pc-row-amt" id="pc-jalsa-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-tahrik" onclick="toggleChanda('tahrik')"><div class="pc-row-left"><div><div class="pc-row-name">Tahrik-e-Jadid</div><div class="pc-row-amt" id="pc-tahrik-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-waqf" onclick="toggleChanda('waqf')"><div class="pc-row-left"><div><div class="pc-row-name">Waqf-e-Jadid</div><div class="pc-row-amt" id="pc-waqf-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-khudam" style="display:none;" onclick="toggleChanda('khudam')"><div class="pc-row-left"><div><div class="pc-row-name">Khudam Chanda</div><div class="pc-row-amt" id="pc-khudam-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-ijtema" style="display:none;" onclick="toggleChanda('ijtema')"><div class="pc-row-left"><div><div class="pc-row-name">Khudam Ijtema</div><div class="pc-row-amt" id="pc-ijtema-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-total-row"><span class="pt-label">Amount recorded as paid</span><span class="pt-amt" id="partialTotal">£ 0.00</span></div>
+            </div>
+            <button class="save-btn" onclick="savePayment()">Save Payment</button>
+            </div><!-- /pay-log-section -->
+          </div>
+        </div>
+        <div class="slabel">All Months</div>
+        <div class="card" style="padding:0;" id="payment-history">
+          <div style="padding:16px;text-align:center;"><div style="font-size:13px;color:var(--soft);">No payment history yet.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUMMARY ══ -->
+    <div class="screen" id="screen-summary">
+      <div class="screen-subbar"><span class="screen-subtitle" id="summary-year-label">Your chanda year</span></div>
+      <div class="sbody">
+        <div class="progress-card">
+          <div class="pc-label">Total Paid This Year</div>
+          <div class="pc-year" id="sum-year-range">—</div>
+          <div class="pc-amounts"><div class="pc-paid-amt" id="sum-paid">£ 0.00</div><div class="pc-of">of</div><div class="pc-total-amt" id="sum-total">£ 0.00</div></div>
+          <div class="prog-track"><div class="prog-fill" id="sum-prog-fill" style="width:0%"></div></div>
+          <div class="pc-meta"><span class="pc-pct" id="sum-pct">0% complete</span><span class="pc-remaining" id="sum-remaining">£ 0.00 remaining</span></div>
+        </div>
+        <div class="slabel">By Chanda</div>
+        <div class="card" style="padding:0;">
+          <div class="breakdown-row"><div class="br-top"><div class="br-left"><span class="br-name" id="sum-aam-name">Chanda Aam</span></div><div class="br-right"><div class="br-paid" id="sum-aam-paid">£ 0.00</div><div class="br-of" id="sum-aam-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill green" id="sum-aam-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row"><div class="br-top"><div class="br-left"><span class="br-name">Jalsa Salana</span></div><div class="br-right"><div class="br-paid" id="sum-jalsa-paid">£ 0.00</div><div class="br-of" id="sum-jalsa-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill green" id="sum-jalsa-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row"><div class="br-top"><div class="br-left"><span class="br-name">Tahrik-e-Jadid</span></div><div class="br-right"><div class="br-paid" style="color:var(--gold);" id="sum-tahrik-paid">£ 0.00</div><div class="br-of" id="sum-tahrik-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill gold" id="sum-tahrik-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row"><div class="br-top"><div class="br-left"><span class="br-name">Waqf-e-Jadid</span></div><div class="br-right"><div class="br-paid" style="color:var(--gold);" id="sum-waqf-paid">£ 0.00</div><div class="br-of" id="sum-waqf-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill gold" id="sum-waqf-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row" id="sum-khudam-row" style="display:none;"><div class="br-top"><div class="br-left"><span class="br-name">Khudam Chanda</span></div><div class="br-right"><div class="br-paid" style="color:var(--blue);" id="sum-khudam-paid">£ 0.00</div><div class="br-of" id="sum-khudam-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill" style="background:var(--blue);" id="sum-khudam-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row" id="sum-ijtema-row" style="display:none;"><div class="br-top"><div class="br-left"><span class="br-name">Khudam Ijtema</span></div><div class="br-right"><div class="br-paid" style="color:var(--blue);" id="sum-ijtema-paid">£ 0.00</div><div class="br-of" id="sum-ijtema-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill" style="background:var(--blue);" id="sum-ijtema-bar" style="width:0%"></div></div></div>
+        </div>
+        <div class="projection-card"><div class="proj-text" id="sum-projection">Complete your first payment to see your year projection.</div></div>
+        <div class="slabel">Month by Month</div>
+        <div class="card" style="padding:0;">
+          <div class="month-grid" id="sum-month-grid"></div>
+          <div style="padding:0 12px 10px;display:flex;gap:12px;flex-wrap:wrap;">
+            <span style="font-size:10px;color:var(--soft);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span>Paid</span>
+            <span style="font-size:10px;color:var(--soft);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;"></span>Partial</span>
+            <span style="font-size:10px;color:var(--soft);display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;"></span>Missed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BOTTOM NAV ══ -->
+    <div class="bottomnav">
+      <div class="bnav-item on" id="bnav-home" onclick="goTo('home')"><svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="bnav-label">Home</span></div>
+      <div class="bnav-item" id="bnav-chandas" onclick="goTo('chandas')"><svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span class="bnav-label">Chandas</span></div>
+      <div class="bnav-item" id="bnav-payments" onclick="goTo('payments')"><svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg><span class="bnav-label">Payments</span></div>
+      <div class="bnav-item" id="bnav-summary" onclick="goTo('summary')"><svg class="bnav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="bnav-label">Summary</span></div>
+    </div>
+
+    <!-- ══ DRAWER ══ -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="drawer">
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      <div class="drawer-head">
+        <div class="drawer-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="drawer-name" id="drawer-name">—</div>
+        <div class="drawer-sub">Ahmadiyya Muslim Community</div>
+      </div>
+      <div class="drawer-nav">
+        <div class="drawer-section-label">Account</div>
+        <div class="drawer-item" onclick="openAScreen('income')"><div class="di-icon green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="7" x2="15" y2="7"/><path d="M6 17h12"/><path d="M8 17v-4a4 4 0 118 0"/><path d="M6 11h5"/></svg></div><div class="di-info"><div class="di-name">Income Setup</div><div class="di-desc">Edit your income and sources</div></div><span class="di-arrow">›</span></div>
+        <div class="drawer-item" onclick="openAScreen('wasiyyat')"><div class="di-icon gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 22"/><path d="M3.82 22c4-2 9-4 13-9C21 7 21 2 21 2c-5 0-12 2-17.18 20z"/></svg></div><div class="di-info"><div class="di-name">Wasiyyat / Moosi</div><div class="di-desc">Enable Moosi calculations</div></div><span class="di-arrow">›</span></div>
+        <div class="drawer-item" onclick="openAScreen('reminders')"><div class="di-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="di-info"><div class="di-name">Reminders</div><div class="di-desc">Chanda and pledge notifications</div></div><span class="di-arrow">›</span></div>
+        <!-- PWA Install button — shown only when installable -->
+        <div class="drawer-item" id="pwa-install-btn" style="display:none;" onclick="installPWA()">
+          <div class="di-icon green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div class="di-info">
+            <div class="di-name">Install App</div>
+            <div class="di-desc">Add to your home screen</div>
+          </div>
+          <span class="di-arrow">›</span>
+        </div>
+        <div class="drawer-divider"></div>
+        <div class="drawer-item" id="reset-btn" onclick="showResetConfirm()"><div class="di-icon red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div><div class="di-info"><div class="di-name">Reset &amp; Start Over</div><div class="di-desc">Clear all data and re-run setup</div></div><span class="di-arrow">›</span></div>
+        <div id="reset-confirm" style="display:none;margin:4px 16px 8px;background:var(--red-l);border:1px solid #f5c6c6;border-radius:10px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px;">Delete all data and restart?</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="hideResetConfirm()" style="flex:1;padding:8px;border:1.5px solid var(--line);border-radius:7px;background:var(--white);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--soft);cursor:pointer;">Cancel</button>
+            <button onclick="obReset()" style="flex:1;padding:8px;border:none;border-radius:7px;background:var(--red);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:white;cursor:pointer;">Yes, Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ INCOME ACCOUNT SCREEN ══ -->
+    <div class="ascreen" id="ascreen-income">
+      <div class="ascreen-head"><div class="ascreen-back" onclick="closeAScreen()">←</div><div class="ascreen-title">Income Setup</div></div>
+      <div class="ascreen-body">
+        <div class="a-slabel">Primary Income</div>
+        <div style="font-size:11px;color:var(--soft);padding:0 2px 10px;line-height:1.6;">Your income is carried forward each month automatically. Update here if your income changes — the new amount will apply from the following month onwards.</div>
+        <div class="a-card">
+          <div class="a-field-wrap">
+            <label class="a-flabel">Monthly net income (after tax)</label>
+            <div class="a-fwrap"><span class="a-fsym">£</span><input class="a-finput" id="edit-primary" type="number" placeholder="0.00" inputmode="decimal" oninput="editCalcSummary()"></div>
+          </div>
+        </div>
+        <div class="a-slabel">Other Sources</div>
+        <div class="a-card" id="edit-sources-list">
+          <div><div class="a-row" style="cursor:pointer;" onclick="editAddSource()"><div class="a-row-left"><div class="a-row-label" style="color:var(--green);">＋ Add income source</div></div></div></div>
+        </div>
+        <button class="save-changes-btn" onclick="saveIncomeEdit()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- ══ WASIYYAT SCREEN ══ -->
+    <div class="ascreen" id="ascreen-wasiyyat">
+      <div class="ascreen-head"><div class="ascreen-back" onclick="closeAScreen()">←</div><div class="ascreen-title">Wasiyyat / Moosi</div></div>
+      <div class="ascreen-body">
+        <div class="a-slabel">Moosi Status</div>
+        <div class="a-card">
+          <div class="a-row"><div class="a-row-left"><div class="a-row-label">I am a Moosi member</div><div class="a-row-sub">Wasiyyat replaces Chanda Aam</div></div>
+            <input type="checkbox" class="a-toggle-inp" id="moosiToggle" onchange="toggleMoosi()">
+            <label class="a-toggle-track" for="moosiToggle"></label>
+          </div>
+        </div>
+        <div id="moosiOffState"><div style="background:var(--gold-l);border:1px solid var(--gold-m);border-radius:9px;padding:12px 13px;margin-bottom:12px;font-size:11px;color:var(--gold);line-height:1.5;">Enable only if formally accepted into the Nizam-e-Wasiyyat.</div></div>
+        <div id="moosiOnState" style="display:none;">
+          <div style="background:var(--green-l);border:1px solid var(--green-m);border-radius:9px;padding:12px 13px;margin-bottom:12px;font-size:11px;color:var(--green);line-height:1.5;"><strong>Moosi enabled.</strong> Wasiyyat replaces Chanda Aam across all screens.</div>
+          <div class="a-slabel">Wasiyyat Rate</div>
+          <div class="a-card"><div class="rate-chips"><span class="rate-chip" onclick="setRate(this,'10%')">10%</span><span class="rate-chip on" onclick="setRate(this,'12.5%')">12.5%</span><span class="rate-chip" onclick="setRate(this,'15%')">15%</span><span class="rate-chip" onclick="setRate(this,'20%')">20%</span><span class="rate-chip" onclick="setRate(this,'25%')">25%</span><span class="rate-chip" onclick="setRate(this,'33%')">33%</span></div></div>
+        </div>
+        <button class="save-changes-btn" onclick="closeAScreen()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- ══ REMINDERS SCREEN ══ -->
+    <div class="ascreen" id="ascreen-reminders">
+      <div class="ascreen-head"><div class="ascreen-back" onclick="closeAScreen()">←</div><div class="ascreen-title">Reminders</div></div>
+      <div class="ascreen-body">
+        <div class="a-slabel">Monthly</div>
+        <div class="a-card">
+          <div class="rem-row"><span class="rem-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><div class="rem-info"><div class="rem-name">Monthly Chanda Due</div><div class="rem-desc">Remind me to pay my monthly chandas</div><div class="rem-time-pick show" id="rtp-monthly"><span class="rtp-chip" onclick="pickTime(this)">1st</span><span class="rtp-chip on" onclick="pickTime(this)">5th</span><span class="rtp-chip" onclick="pickTime(this)">10th</span><span class="rtp-chip" onclick="pickTime(this)">15th</span><span class="rtp-chip" onclick="pickTime(this)">25th</span></div></div><div><input type="checkbox" class="a-toggle-inp" id="remMonthly" checked onchange="toggleRemTime('monthly',this)"><label class="a-toggle-track" for="remMonthly"></label></div></div>
+        </div>
+        <div class="a-slabel">Annual</div>
+        <div class="a-card">
+          <div class="rem-row"><span class="rem-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><div class="rem-info"><div class="rem-name">Jalsa Salana</div><div class="rem-desc">Annual reminder</div><div class="rem-time-pick" id="rtp-jalsa"><span class="rtp-chip on" onclick="pickTime(this)">1 month before</span><span class="rtp-chip" onclick="pickTime(this)">On the day</span></div></div><div><input type="checkbox" class="a-toggle-inp" id="remJalsa" onchange="toggleRemTime('jalsa',this)"><label class="a-toggle-track" for="remJalsa"></label></div></div>
+          <div class="rem-row"><span class="rem-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 22"/><path d="M3.82 22c4-2 9-4 13-9C21 7 21 2 21 2c-5 0-12 2-17.18 20z"/></svg></span><div class="rem-info"><div class="rem-name">Tahrik Year Start</div><div class="rem-desc">Nov 1</div><div class="rem-time-pick" id="rtp-tahrik"><span class="rtp-chip on" onclick="pickTime(this)">Oct 25</span><span class="rtp-chip" onclick="pickTime(this)">Nov 1</span></div></div><div><input type="checkbox" class="a-toggle-inp" id="remTahrik" onchange="toggleRemTime('tahrik',this)"><label class="a-toggle-track" for="remTahrik"></label></div></div>
+          <div class="rem-row"><span class="rem-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span><div class="rem-info"><div class="rem-name">Waqf Year Start</div><div class="rem-desc">Jan 1</div><div class="rem-time-pick" id="rtp-waqf"><span class="rtp-chip on" onclick="pickTime(this)">Dec 25</span><span class="rtp-chip" onclick="pickTime(this)">Jan 1</span></div></div><div><input type="checkbox" class="a-toggle-inp" id="remWaqf" onchange="toggleRemTime('waqf',this)"><label class="a-toggle-track" for="remWaqf"></label></div></div>
+        </div>
+        <button class="save-changes-btn" onclick="closeAScreen()">Save Reminders</button>
+      </div>
+    </div>
+
+  </div><!-- /main-app -->
+
+</div><!-- /phone -->
+<script>
+// ════════════════════════════════════════
+// CHANDA TRACKER — app.js
+// ════════════════════════════════════════
+
+// ── HELPERS ──────────────────────────────
+// ── SECURITY: HTML escape user input before inserting into innerHTML ──
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+const fmt = n =>
+  '£ ' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const now    = new Date();
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SHORT  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const currentMonthStr = MONTHS[now.getMonth()] + ' ' + now.getFullYear();
+
+
+// ── SECURITY: Sanitise numeric inputs — cap at reasonable max ──
+const MAX_INCOME = 10000000; // £10M/month max
+const MAX_PLEDGE = 10000000; // £10M pledge max
+function sanitizeIncome(val) { const n = parseFloat(val) || 0; return Math.min(Math.max(0, n), MAX_INCOME); }
+function sanitizePledge(val) { const n = parseFloat(val) || 0; return Math.min(Math.max(0, n), MAX_PLEDGE); }
+
+// ── PROFILE STORAGE ──────────────────────
+function saveProfile(p) { localStorage.setItem('chandaProfile', JSON.stringify(p)); }
+function loadProfile()  { try { const s = localStorage.getItem('chandaProfile'); return s ? JSON.parse(s) : null; } catch(e) { console.warn('Profile parse error:', e); return null; } }
+
+// ── AGE & KHUDAM HELPERS ─────────────────
+function getAge(dob) {
+  if (!dob) return null;
+  const today = new Date();
+  const birth = new Date(dob);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+function isKhudam(profile) {
+  const age = getAge(profile.dob);
+  return age !== null && age >= 15 && age <= 40;
+}
+
+// ── CHANDA CALCULATIONS ──────────────────
+function calcChandas(profile) {
+  const total      = profile.primaryIncome + (profile.sources || []).reduce((s, src) => s + src.amount, 0);
+  const isMoosi    = profile.isMoosi || false;
+  const wRate      = profile.wasiyyatRate || 12.5;
+  const aam        = isMoosi ? total * (wRate / 100) : total * 0.0625;
+  const aamLabel   = isMoosi ? 'Wasiyyat (' + wRate + '%)' : 'Chanda Aam';
+  const aamRate    = isMoosi ? wRate + '%' : '6.25%';
+  const jalsaAnn   = total * 12 * 0.0083;
+  const jalsaMo    = jalsaAnn / 12;
+  const tahrikMo   = (profile.tahrikPledge || 0) / 12;
+  const waqfMo     = (profile.waqfPledge  || 0) / 12;
+  // Auxiliary — Khudam (based on annual income)
+  const annualInc  = total * 12;
+  const khudamUser = isKhudam(profile);
+  const khudamMo   = khudamUser ? annualInc * 0.01  / 12 : 0;
+  const ijtamaMo   = khudamUser ? annualInc * 0.005 / 12 : 0;
+  const grandMo    = aam + jalsaMo + tahrikMo + waqfMo + khudamMo + ijtamaMo;
+  const annualTotal = aam * 12 + jalsaAnn
+                    + (profile.tahrikPledge || 0)
+                    + (profile.waqfPledge   || 0)
+                    + (khudamUser ? annualInc * 0.01  : 0)
+                    + (khudamUser ? annualInc * 0.005 : 0);
+  return {
+    total, annualInc,
+    aam, aamLabel, aamRate, isMoosi,
+    jalsaAnn, jalsaMo,
+    tahrikMo, waqfMo,
+    khudamUser, khudamMo, ijtamaMo,
+    grandMo, annualTotal,
+  };
+}
+
+// ── RENDER APP FROM PROFILE ──────────────
+function renderApp() {
+  const p = loadProfile();
+  if (!p) return;
+  const c = calcChandas(p);
+  const mo = currentMonthStr;
+
+  // ── Hero
+  const nowKey     = getMonthKey();
+  const prevLabel  = prevMonthLabel(nowKey);
+  document.getElementById('hero-greeting').textContent = 'Assalamu Alaikum, ' + p.name;
+  document.getElementById('hero-month').textContent    = mo + ' · Due';
+  document.getElementById('hero-due').textContent      = fmt(c.grandMo);
+
+  // ── Home this-month card
+  document.getElementById('home-month-title').textContent = mo;
+  // Update card sub-label to show income basis
+  const qpayMonth = document.querySelector('.qpay-month');
+  if (qpayMonth) qpayMonth.textContent = 'Based on ' + prevLabel + ' income';
+  // Update Chanda Aam / Wasiyyat label & amount on home card
+  const homeAamName = document.getElementById('home-aam-name');
+  if (homeAamName) homeAamName.textContent = c.aamLabel;
+  document.getElementById('home-aam').textContent    = fmt(c.aam);
+  document.getElementById('home-jalsa').textContent  = fmt(c.jalsaMo);
+  document.getElementById('home-tahrik').textContent = fmt(c.tahrikMo);
+  document.getElementById('home-waqf').textContent   = fmt(c.waqfMo);
+  // Khudam rows on home card — show only if applicable
+  const homeKhudamRow = document.getElementById('home-khudam-row');
+  const homeIjtemaRow = document.getElementById('home-ijtema-row');
+  if (homeKhudamRow) homeKhudamRow.style.display = c.khudamUser ? 'flex' : 'none';
+  if (homeIjtemaRow) homeIjtemaRow.style.display = c.khudamUser ? 'flex' : 'none';
+  const homeKhudam = document.getElementById('home-khudam');
+  const homeIjtema = document.getElementById('home-ijtema');
+  if (homeKhudam) homeKhudam.textContent = fmt(c.khudamMo);
+  if (homeIjtema) homeIjtema.textContent = fmt(c.ijtamaMo);
+  // Grand total = sum of all rows shown
+  document.getElementById('home-total').textContent  = fmt(c.grandMo);
+  document.getElementById('hero-due').textContent    = fmt(c.grandMo);
+
+  // ── Moosi badge on home card
+  const homeMoosiBadge = document.getElementById('home-moosi-badge');
+  if (homeMoosiBadge) homeMoosiBadge.style.display = c.isMoosi ? 'inline-flex' : 'none';
+
+  // ── Chandas tab month pill
+  document.getElementById('chandas-month-pill').textContent = mo;
+
+  // ── Lazmi tab — update Chanda Aam row label, rate tag, amount
+  const chAamName = document.getElementById('ch-aam-name');
+  if (chAamName) chAamName.textContent = c.aamLabel;
+  const chAamRate = document.getElementById('ch-aam-rate');
+  if (chAamRate) { chAamRate.textContent = c.aamRate; chAamRate.className = 'rate-tag ' + (c.isMoosi ? 'gold' : 'green'); }
+  const chAamDesc = document.getElementById('ch-aam-desc');
+  if (chAamDesc) chAamDesc.textContent = c.isMoosi ? 'of monthly income (Wasiyyat)' : 'of monthly income';
+  document.getElementById('ch-aam').textContent          = fmt(c.aam);
+  document.getElementById('ch-jalsa-ann').textContent    = fmt(c.jalsaAnn);
+  document.getElementById('ch-jalsa-mo').textContent     = fmt(c.jalsaMo);
+  document.getElementById('ch-lazmi-total').textContent  = fmt(c.aam + c.jalsaMo);
+  // Lazmi total-row label
+  const trAamName = document.getElementById('tr-aam-name');
+  if (trAamName) trAamName.textContent = c.aamLabel + ' / month';
+  document.getElementById('ch-tr-aam').textContent    = fmt(c.aam);
+  document.getElementById('ch-tr-jalsa').textContent  = fmt(c.jalsaMo);
+  document.getElementById('ch-tr-lazmi').textContent  = fmt(c.aam + c.jalsaMo);
+  // Lazmi label text
+  const lazmiLabel = document.getElementById('lazmi-section-label');
+  if (lazmiLabel) lazmiLabel.textContent = c.isMoosi ? 'Wasiyyat + Jalsa' : 'Lazmi Chandas';
+
+  // ── Temp tab
+  document.getElementById('ch-tahrik').textContent     = fmt(c.tahrikMo);
+  document.getElementById('ch-waqf').textContent       = fmt(c.waqfMo);
+  document.getElementById('ch-temp-total').textContent = fmt(c.tahrikMo + c.waqfMo);
+  document.getElementById('ch-tr-tahrik').textContent  = fmt(c.tahrikMo);
+  document.getElementById('ch-tr-waqf').textContent    = fmt(c.waqfMo);
+  document.getElementById('ch-tr-temp').textContent    = fmt(c.tahrikMo + c.waqfMo);
+  // Pay panel amounts
+  const moTahrik  = document.getElementById('pledge-pay-mo-tahrik');
+  const annTahrik = document.getElementById('pledge-pay-ann-tahrik');
+  const moWaqf    = document.getElementById('pledge-pay-mo-waqf');
+  const annWaqf   = document.getElementById('pledge-pay-ann-waqf');
+  if (moTahrik)  moTahrik.textContent  = fmt(c.tahrikMo);
+  if (annTahrik) annTahrik.textContent = fmt(p.tahrikPledge || 0);
+  if (moWaqf)    moWaqf.textContent    = fmt(c.waqfMo);
+  if (annWaqf)   annWaqf.textContent   = fmt(p.waqfPledge || 0);
+
+  // ── Grand Total card (in Auxiliary tab) — row labels + values
+  const chAllAamName = document.getElementById('tr-all-aam-name');
+  if (chAllAamName) chAllAamName.textContent = c.aamLabel;
+  const chAllAamRate = document.getElementById('ch-all-aam-rate');
+  if (chAllAamRate) { chAllAamRate.textContent = c.aamRate; chAllAamRate.className = 'rate-tag ' + (c.isMoosi ? 'gold' : 'green'); }
+  const elG = id => document.getElementById(id);
+  if (elG('ch-grand-total'))   elG('ch-grand-total').textContent   = fmt(c.grandMo);
+  if (elG('ch-all-tr-aam'))    elG('ch-all-tr-aam').textContent    = fmt(c.aam);
+  if (elG('ch-all-tr-jalsa'))  elG('ch-all-tr-jalsa').textContent  = fmt(c.jalsaMo);
+  if (elG('ch-all-tr-tahrik')) elG('ch-all-tr-tahrik').textContent = fmt(c.tahrikMo);
+  if (elG('ch-all-tr-waqf'))   elG('ch-all-tr-waqf').textContent   = fmt(c.waqfMo);
+  if (elG('ch-all-tr-grand'))  elG('ch-all-tr-grand').textContent  = fmt(c.grandMo);
+
+  // ── Payments tab labels (amounts handled by loadMonthIntoUI)
+  const payAamName = document.getElementById('pay-aam-name');
+  if (payAamName) payAamName.textContent = c.aamLabel;
+  const pcAamName = document.getElementById('pc-aam-name');
+  if (pcAamName) pcAamName.textContent = c.aamLabel;
+
+  // ── Summary tab label for Chanda Aam row
+  const sumAamName = document.getElementById('sum-aam-name');
+  if (sumAamName) sumAamName.textContent = c.aamLabel;
+
+  // ── Drawer name
+  document.getElementById('drawer-name').textContent = p.name;
+
+  // ── Auxiliary (Khudam) elements ──
+  const khudamEl = document.getElementById('aux-khudam-section');
+  const naEl     = document.getElementById('aux-na-section');
+  if (khudamEl) khudamEl.style.display = c.khudamUser ? 'block' : 'none';
+  if (naEl)     naEl.style.display     = c.khudamUser ? 'none'  : 'block';
+
+  // Chandas tab auxiliary
+  const el = (id) => document.getElementById(id);
+  if (el('ch-khudam'))      el('ch-khudam').textContent      = fmt(c.khudamMo);
+  if (el('ch-ijtema'))      el('ch-ijtema').textContent      = fmt(c.ijtamaMo);
+  if (el('ch-khudam-ann'))  el('ch-khudam-ann').textContent  = fmt(c.khudamMo * 12) + ' / yr';
+  if (el('ch-ijtema-ann'))  el('ch-ijtema-ann').textContent  = fmt(c.ijtamaMo * 12) + ' / yr';
+  if (el('basis-annual'))   el('basis-annual').textContent   = fmt(c.annualInc);
+  if (el('basis-total'))    el('basis-total').textContent    = fmt(c.total);
+  if (el('ch-aux-total'))   el('ch-aux-total').textContent   = fmt(c.khudamMo + c.ijtamaMo);
+  if (el('ch-tr-khudam'))   el('ch-tr-khudam').textContent   = fmt(c.khudamMo);
+  if (el('ch-tr-ijtema'))   el('ch-tr-ijtema').textContent   = fmt(c.ijtamaMo);
+  if (el('ch-tr-aux'))      el('ch-tr-aux').textContent      = fmt(c.khudamMo + c.ijtamaMo);
+  // Grand total rows in Auxiliary tab
+  if (el('ch-all-tr-khudam')) el('ch-all-tr-khudam').textContent = fmt(c.khudamMo);
+  if (el('ch-all-tr-ijtema')) el('ch-all-tr-ijtema').textContent = fmt(c.ijtamaMo);
+  if (el('ch-grand-total'))   el('ch-grand-total').textContent   = fmt(c.grandMo);
+  if (el('ch-all-tr-grand'))  el('ch-all-tr-grand').textContent  = fmt(c.grandMo);
+  // Grand total khudam rows visibility
+  if (el('grand-khudam-row')) el('grand-khudam-row').style.display = c.khudamUser ? 'flex' : 'none';
+  if (el('grand-ijtema-row')) el('grand-ijtema-row').style.display = c.khudamUser ? 'flex' : 'none';
+
+  // Payments tab Khudam rows
+  ['pay-khudam-row','pay-ijtema-row'].forEach(id => {
+    if (el(id)) el(id).style.display = c.khudamUser ? 'flex' : 'none';
+  });
+  if (el('pay-khudam')) el('pay-khudam').textContent = fmt(c.khudamMo);
+  if (el('pay-ijtema')) el('pay-ijtema').textContent = fmt(c.ijtamaMo);
+  if (el('pc-khudam'))  el('pc-khudam').style.display  = c.khudamUser ? 'flex' : 'none';
+  if (el('pc-ijtema'))  el('pc-ijtema').style.display  = c.khudamUser ? 'flex' : 'none';
+  if (el('pc-khudam-amt')) el('pc-khudam-amt').textContent = fmt(c.khudamMo) + ' due';
+  if (el('pc-ijtema-amt')) el('pc-ijtema-amt').textContent = fmt(c.ijtamaMo) + ' due';
+
+  // ── Sync Wasiyyat screen UI to profile state
+  const moosiToggle = document.getElementById('moosiToggle');
+  if (moosiToggle) {
+    moosiToggle.checked = p.isMoosi || false;
+    document.getElementById('moosiOffState').style.display = p.isMoosi ? 'none'  : 'block';
+    document.getElementById('moosiOnState').style.display  = p.isMoosi ? 'block' : 'none';
+    // Highlight correct rate chip
+    document.querySelectorAll('.rate-chip').forEach(chip => {
+      chip.classList.toggle('on', parseFloat(chip.textContent) === (p.wasiyyatRate || 12.5));
+    });
+  }
+
+  // ── Set live chanda amounts for payment UI (includes Khudam)
+  chandaAmounts = { aam: c.aam, jalsa: c.jalsaMo, tahrik: c.tahrikMo, waqf: c.waqfMo, khudam: c.khudamMo, ijtema: c.ijtamaMo };
+
+  // ── Initialise payments scroller to current month
+  selectedMonthKey   = getMonthKey();
+  loadMonthIntoUI(selectedMonthKey);
+
+  // ── Populate income edit screen
+  populateIncomeEdit(p);
+
+  // ── Render summary and payment history
+  renderSummary();
+  renderPaymentHistory();
+  renderHomeCard();
+}
+
+// ── PREVIOUS MONTH LABEL HELPER ──────────
+function prevMonthLabel(mk) {
+  // Given a monthKey like "2026-03", returns "February 2026"
+  let { year, month } = parseKey(mk);
+  month--;
+  if (month < 1) { month = 12; year--; }
+  return MONTHS[month - 1] + ' ' + year;
+}
+
+// ── RENDER HOME CARD ─────────────────────
+// Shows remaining amounts due for the current month
+function renderHomeCard() {
+  const p = loadProfile();
+  if (!p) return;
+  const c      = calcChandas(p);
+  const mk     = getMonthKey();
+  const record = loadPayments().find(r => r.monthKey === mk);
+
+  const paid      = record ? record.chandaPaid : {};
+  const aamRem    = Math.max(0, c.aam      - (paid.aam    || 0));
+  const jalsaRem  = Math.max(0, c.jalsaMo  - (paid.jalsa  || 0));
+  const tahrikRem = Math.max(0, c.tahrikMo - (paid.tahrik || 0));
+  const waqfRem   = Math.max(0, c.waqfMo   - (paid.waqf   || 0));
+  const khudamRem = Math.max(0, c.khudamMo - (paid.khudam || 0));
+  const ijtemaRem = Math.max(0, c.ijtamaMo - (paid.ijtema || 0));
+  const totalRem  = aamRem + jalsaRem + tahrikRem + waqfRem + khudamRem + ijtemaRem;
+
+  const el = id => document.getElementById(id);
+  if (el('home-aam'))    el('home-aam').textContent    = fmt(aamRem);
+  if (el('home-jalsa'))  el('home-jalsa').textContent  = fmt(jalsaRem);
+  if (el('home-tahrik')) el('home-tahrik').textContent = fmt(tahrikRem);
+  if (el('home-waqf'))   el('home-waqf').textContent   = fmt(waqfRem);
+  if (el('home-khudam')) el('home-khudam').textContent = fmt(khudamRem);
+  if (el('home-ijtema')) el('home-ijtema').textContent = fmt(ijtemaRem);
+  if (el('home-total'))  el('home-total').textContent  = fmt(totalRem);
+  if (el('hero-due'))    el('hero-due').textContent    = fmt(totalRem);
+
+  // Update status badge on each row
+  const setBadge = (id, remaining) => {
+    const row = el(id);
+    if (!row) return;
+    const badge = row.querySelector('.qpay-status');
+    if (!badge) return;
+    if (remaining <= 0) {
+      badge.textContent  = 'Paid';
+      badge.style.cssText = 'background:var(--green-l);color:var(--green);';
+    } else {
+      badge.textContent  = 'Due';
+      badge.style.cssText = '';
+      badge.className    = 'qpay-status qs-due';
+    }
+  };
+  setBadge('home-aam-row',    aamRem);
+  setBadge('home-jalsa-row',  jalsaRem);
+  setBadge('home-tahrik-row', tahrikRem);
+  setBadge('home-waqf-row',   waqfRem);
+  setBadge('home-khudam-row', khudamRem);
+  setBadge('home-ijtema-row', ijtemaRem);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const profile = loadProfile();
+  if (profile && profile.onboardingDone) {
+    showMainApp();
+    renderApp();
+  } else {
+    showOnboarding();
+  }
+});
+
+function showOnboarding() {
+  document.getElementById('onboarding').style.display = 'flex';
+  document.getElementById('main-app').style.display   = 'none';
+}
+
+function showMainApp() {
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('main-app').style.display   = 'flex';
+}
+
+// ════════════════════════════════════════
+// ONBOARDING LOGIC
+// ════════════════════════════════════════
+
+let obSrcCounter = 0;
+const obSources  = []; // { id, name, amount, recurring }
+
+function obShowStep(n) {
+  document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob-step-' + n).classList.add('active');
+  document.getElementById('onboarding').scrollTop = 0;
+}
+
+function obNext(from) {
+  if (from === 1) {
+    const name = document.getElementById('ob-name').value.trim();
+    if (!name) { obError(1, 'Please enter your name.'); return; }
+    const dobVal = document.getElementById('ob-dob').value;
+    if (!dobVal) { obError(1, 'Please enter your date of birth.'); return; }
+    obShowStep(2);
+  } else if (from === 2) {
+    const primary = parseFloat(document.getElementById('ob-primary').value) || 0;
+    if (primary <= 0) { obError(2, 'Please enter your monthly income.'); return; }
+    document.getElementById('ob-err-2').textContent = '';
+    obShowStep(3);
+  } else if (from === 3) {
+    // Wasiyyat step — no validation needed, just proceed
+    obShowStep(4);
+  } else if (from === 4) {
+    obBuildSummary();
+    obShowStep(5);
+  }
+}
+
+function obBack(from) {
+  obShowStep(from - 1);
+}
+
+function obError(step, msg) {
+  const el = document.getElementById('ob-err-' + step);
+  if (el) { el.textContent = msg; }
+}
+
+function obSkipPledges() {
+  document.getElementById('ob-tahrik').value = '';
+  document.getElementById('ob-waqf').value   = '';
+  obBuildSummary();
+  obShowStep(5);
+}
+
+function obAddSource() {
+  obSrcCounter++;
+  const id  = obSrcCounter;
+  const div = document.createElement('div');
+  div.className = 'ob-source-item';
+  div.id = 'ob-src-' + id;
+  div.innerHTML = `
+    <div class="ob-src-row">
+      <input class="ob-src-name" type="text" placeholder="Source name (e.g. Rental)" oninput="obSyncSources()">
+      <button class="ob-src-rm" onclick="obRemoveSource(${id})">✕</button>
+    </div>
+    <div class="ob-field-wrap" style="margin-top:6px;">
+      <span class="ob-sym">£</span>
+      <input class="ob-input ob-num ob-src-amt" type="number" placeholder="0.00" inputmode="decimal" oninput="obSyncSources();obCalcPreview()">
+    </div>
+    <div class="ob-rec-row">
+      <div>
+        <div class="ob-rec-label">Recurring monthly</div>
+        <div class="ob-rec-desc" id="ob-rec-desc-${id}">Carried forward to coming months</div>
+      </div>
+      <input type="checkbox" class="a-toggle-inp" id="ob-rec-${id}" checked onchange="obUpdateRecDesc(${id},this.checked);obSyncSources()">
+      <label class="a-toggle-track" for="ob-rec-${id}"></label>
+    </div>`;
+  const list = document.getElementById('ob-sources-list');
+  list.appendChild(div);
+  obSyncSources();
+  obCalcPreview();
+}
+
+function obRemoveSource(id) {
+  const el = document.getElementById('ob-src-' + id);
+  if (el) el.remove();
+  obSyncSources();
+  obCalcPreview();
+}
+
+function obUpdateRecDesc(id, checked) {
+  const el = document.getElementById('ob-rec-desc-' + id);
+  if (el) el.textContent = checked ? 'Carried forward to coming months' : 'Only appears in current month';
+}
+
+function obSyncSources() {
+  // Rebuild sources array from DOM
+  obSources.length = 0;
+  document.querySelectorAll('.ob-source-item').forEach((div, i) => {
+    const name   = div.querySelector('.ob-src-name').value.trim() || ('Source ' + (i + 1));
+    const amount = parseFloat(div.querySelector('.ob-src-amt').value) || 0;
+    const recId  = div.querySelector('.a-toggle-inp').id;
+    const rec    = document.getElementById(recId).checked;
+    obSources.push({ id: i + 1, name, amount, recurring: rec });
+  });
+}
+
+function obCalcPreview() {
+  // Preview card removed — function kept for source input handlers
+}
+
+function obWasiyyatChange() {
+  const isYes = document.querySelector('input[name="ob-wasiyyat"]:checked').value === 'yes';
+  const rateSection = document.getElementById('ob-wasiyyat-rate-section');
+  if (rateSection) rateSection.style.display = isYes ? 'block' : 'none';
+  if (isYes) obUpdateWasiyyatPreview();
+}
+
+function obWasiyyatRateInput() {
+  const input  = document.getElementById('ob-wasiyyat-rate-input');
+  const errEl  = document.getElementById('ob-wasiyyat-rate-error');
+  let val = parseFloat(input.value) || 0;
+  if (val > 33) {
+    input.value = 33;
+    val = 33;
+    if (errEl) errEl.style.display = 'block';
+  } else {
+    if (errEl) errEl.style.display = 'none';
+  }
+  obUpdateWasiyyatPreview();
+}
+
+function obSelectRate(chip, rate) {
+  // Kept for Wasiyyat drawer screen (main app) — not used in onboarding anymore
+  chip.closest('.rate-chips').querySelectorAll('.rate-chip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+}
+
+function obUpdateWasiyyatPreview() {
+  const primary  = parseFloat(document.getElementById('ob-primary').value) || 0;
+  const srcTotal = obSources.reduce((s, src) => s + src.amount, 0);
+  const total    = primary + srcTotal;
+  const input    = document.getElementById('ob-wasiyyat-rate-input');
+  const rate     = Math.min(33, parseFloat(input ? input.value : 10) || 10);
+  const monthly  = total * (rate / 100);
+  const el       = document.getElementById('ob-wasiyyat-preview');
+  if (el) el.textContent = fmt(monthly);
+}
+
+function obCalcPledge() {
+  const t = parseFloat(document.getElementById('ob-tahrik').value) || 0;
+  const w = parseFloat(document.getElementById('ob-waqf').value)   || 0;
+  const tMo = document.getElementById('ob-tahrik-mo');
+  const wMo = document.getElementById('ob-waqf-mo');
+  if (t > 0) { tMo.style.display = 'block'; document.getElementById('ob-tahrik-mo-val').textContent = fmt(t / 12); }
+  else { tMo.style.display = 'none'; }
+  if (w > 0) { wMo.style.display = 'block'; document.getElementById('ob-waqf-mo-val').textContent = fmt(w / 12); }
+  else { wMo.style.display = 'none'; }
+}
+
+function obBuildSummary() {
+  obSyncSources();
+  const primary  = parseFloat(document.getElementById('ob-primary').value) || 0;
+  const tahrik   = parseFloat(document.getElementById('ob-tahrik').value)  || 0;
+  const waqf     = parseFloat(document.getElementById('ob-waqf').value)    || 0;
+  const total    = primary + obSources.reduce((s, src) => s + src.amount, 0);
+  const name     = document.getElementById('ob-name').value.trim();
+
+  // Wasiyyat selection
+  const wasiyyatRadio = document.querySelector('input[name="ob-wasiyyat"]:checked');
+  const isMoosi   = wasiyyatRadio && wasiyyatRadio.value === 'yes';
+  const rateInput = document.getElementById('ob-wasiyyat-rate-input');
+  const wRate     = isMoosi ? Math.min(33, parseFloat(rateInput ? rateInput.value : 10) || 10) : 0;
+
+  const aam       = isMoosi ? total * (wRate / 100) : total * 0.0625;
+  const aamLabel  = isMoosi ? `Wasiyyat (${wRate}%)` : 'Chanda Aam (6.25%)';
+  const jalsaAnn  = total * 12 * 0.0083;
+  const jalsaMo   = jalsaAnn / 12;
+  const tahrikMo  = tahrik / 12;
+  const waqfMo    = waqf / 12;
+
+  // Khudam
+  const dobVal        = document.getElementById('ob-dob').value || null;
+  const agePreview    = dobVal ? getAge(dobVal) : null;
+  const isKhudamPrev  = agePreview !== null && agePreview >= 15 && agePreview <= 40;
+  const annualInc     = total * 12;
+  const khudamMoPrev  = isKhudamPrev ? annualInc * 0.01  / 12 : 0;
+  const ijtamaMoPrev  = isKhudamPrev ? annualInc * 0.005 / 12 : 0;
+  const grandMoFull   = aam + jalsaMo + tahrikMo + waqfMo + khudamMoPrev + ijtamaMoPrev;
+
+  document.getElementById('ob-done-name').textContent = name;
+
+  // Update Chanda Aam row label
+  const sumAamNameEl = document.getElementById('ob-sum-aam-label');
+  if (sumAamNameEl) sumAamNameEl.textContent = aamLabel;
+
+  document.getElementById('ob-sum-aam').textContent    = fmt(aam);
+  document.getElementById('ob-sum-jalsa').textContent  = fmt(jalsaAnn) + ' / yr';
+  document.getElementById('ob-sum-tahrik').textContent = tahrik > 0 ? fmt(tahrikMo) + ' / mo' : 'Not set';
+  document.getElementById('ob-sum-waqf').textContent   = waqf   > 0 ? fmt(waqfMo)   + ' / mo' : 'Not set';
+  document.getElementById('ob-sum-total').textContent  = fmt(grandMoFull);
+
+  const obKhudamRow = document.getElementById('ob-sum-khudam-row');
+  const obIjtemaRow = document.getElementById('ob-sum-ijtema-row');
+  if (obKhudamRow) {
+    obKhudamRow.style.display = isKhudamPrev ? 'flex' : 'none';
+    const el = document.getElementById('ob-sum-khudam');
+    if (el) el.textContent = fmt(khudamMoPrev) + ' / mo';
+  }
+  if (obIjtemaRow) {
+    obIjtemaRow.style.display = isKhudamPrev ? 'flex' : 'none';
+    const el = document.getElementById('ob-sum-ijtema');
+    if (el) el.textContent = fmt(ijtamaMoPrev) + ' / mo';
+  }
+}
+
+function obFinish() {
+  obSyncSources();
+  const joinMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+  // Read Wasiyyat selection
+  const wasiyyatRadio = document.querySelector('input[name="ob-wasiyyat"]:checked');
+  const isMoosi   = wasiyyatRadio && wasiyyatRadio.value === 'yes';
+  const rateInput = document.getElementById('ob-wasiyyat-rate-input');
+  const wasiyyatRate = isMoosi ? Math.min(33, parseFloat(rateInput ? rateInput.value : 10) || 10) : 10;
+
+  const profile = {
+    name:          document.getElementById('ob-name').value.trim(),
+    dob:           document.getElementById('ob-dob').value || null,
+    primaryIncome: sanitizeIncome(document.getElementById('ob-primary').value),
+    sources:       obSources.slice(),
+    tahrikPledge:  sanitizePledge(document.getElementById('ob-tahrik').value),
+    waqfPledge:    sanitizePledge(document.getElementById('ob-waqf').value),
+    isMoosi,
+    wasiyyatRate,
+    joinMonth,
+    onboardingDone: true,
+  };
+  saveProfile(profile);
+  showMainApp();
+  renderApp();
+}
+
+function obReset() {
+  localStorage.removeItem('chandaProfile');
+  localStorage.removeItem('chandaPayments');
+  hideResetConfirm();
+  closeDrawer();
+  // Reset onboarding form fields
+  document.getElementById('ob-name').value    = '';
+  document.getElementById('ob-dob').value     = '';
+  document.getElementById('ob-primary').value = '';
+  document.getElementById('ob-tahrik').value  = '';
+  document.getElementById('ob-waqf').value    = '';
+  document.getElementById('ob-sources-list').innerHTML = '';
+  const tahrikMo = document.getElementById('ob-tahrik-mo');
+  const waqfMo   = document.getElementById('ob-waqf-mo');
+  if (tahrikMo) tahrikMo.style.display = 'none';
+  if (waqfMo)   waqfMo.style.display   = 'none';
+  // Reset Wasiyyat selection
+  const noRadio = document.querySelector('input[name="ob-wasiyyat"][value="no"]');
+  if (noRadio) noRadio.checked = true;
+  const rateSection = document.getElementById('ob-wasiyyat-rate-section');
+  if (rateSection) rateSection.style.display = 'none';
+  const rateInput = document.getElementById('ob-wasiyyat-rate-input');
+  if (rateInput) rateInput.value = '10';
+  // Reset error messages
+  ['ob-err-1','ob-err-2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+  obSrcCounter = 0;
+  obSources.length = 0;
+  // Go back to step 1 and show onboarding
+  obShowStep(1);
+  showOnboarding();
+}
+
+function showResetConfirm() {
+  document.getElementById('reset-confirm').style.display = 'block';
+  document.getElementById('reset-btn').style.display = 'none';
+}
+
+function hideResetConfirm() {
+  document.getElementById('reset-confirm').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'flex';
+}
+
+// ════════════════════════════════════════
+// MAIN APP NAVIGATION
+// ════════════════════════════════════════
+
+function goTo(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('on'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  document.getElementById('bnav-' + tab).classList.add('on');
+  const body = document.querySelector('#screen-' + tab + ' .sbody');
+  if (body) body.scrollTop = 0;
+}
+
+function switchCTab(id, btn) {
+  document.querySelectorAll('.ctab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.ctab-panel').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('ctab-' + id).classList.add('on');
+}
+
+// ════════════════════════════════════════
+// DRAWER
+// ════════════════════════════════════════
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.querySelectorAll('.ascreen').forEach(s => s.classList.remove('open'));
+}
+
+function openAScreen(id) {
+  closeDrawer();
+  document.querySelectorAll('.ascreen').forEach(s => s.classList.remove('open'));
+  document.getElementById('ascreen-' + id).classList.add('open');
+}
+
+function closeAScreen() {
+  document.querySelectorAll('.ascreen').forEach(s => s.classList.remove('open'));
+}
+
+// ════════════════════════════════════════
+// INCOME EDIT (account screen)
+// ════════════════════════════════════════
+
+let editSrcCounter = 0;
+
+function populateIncomeEdit(p) {
+  document.getElementById('edit-primary').value = p.primaryIncome || '';
+  // Clear existing sources
+  const list = document.getElementById('edit-sources-list');
+  list.querySelectorAll('.a-source-item').forEach(el => el.remove());
+  (p.sources || []).forEach(src => editAddSourceWithData(src.name, src.amount, src.recurring));
+  editCalcSummary();
+}
+
+function editAddSource() {
+  editAddSourceWithData('', 0, true);
+}
+
+function editAddSourceWithData(name, amount, recurring) {
+  editSrcCounter++;
+  const id  = editSrcCounter;
+  const div = document.createElement('div');
+  div.className = 'a-source-item';
+  div.id = 'edit-src-' + id;
+  div.innerHTML = `
+    <div class="a-field-wrap" style="border-bottom:none;padding-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <input class="a-src-name-inp" type="text" value="${esc(name)}" placeholder="Source name">
+        <button class="a-src-remove" onclick="editRemoveSource('edit-src-${id}')">✕</button>
+      </div>
+      <div class="a-fwrap"><span class="a-fsym">£</span><input class="a-finput a-src-amt" type="number" value="${amount || ''}" placeholder="0.00" inputmode="decimal" oninput="editCalcSummary()"></div>
+    </div>
+    <div class="a-recurring-row">
+      <div class="a-rec-left">
+        <div class="a-row-label">Recurring monthly</div>
+        <div class="a-row-sub" id="edit-rec-desc-${id}">${recurring ? 'Carried forward to coming months' : 'Only appears in current month'}</div>
+      </div>
+      <input type="checkbox" class="a-toggle-inp" id="edit-rec-${id}" ${recurring ? 'checked' : ''} onchange="editUpdateRecDesc(${id},this.checked)">
+      <label class="a-toggle-track" for="edit-rec-${id}"></label>
+    </div>`;
+  const list  = document.getElementById('edit-sources-list');
+  const addRow = list.querySelector('[onclick="editAddSource()"]').parentElement;
+  list.insertBefore(div, addRow);
+  editCalcSummary();
+}
+
+function editRemoveSource(srcId) {
+  const el = document.getElementById(srcId);
+  if (el) { el.remove(); editCalcSummary(); }
+}
+
+function editUpdateRecDesc(id, checked) {
+  const el = document.getElementById('edit-rec-desc-' + id);
+  if (el) el.textContent = checked ? 'Carried forward to coming months' : 'Only appears in current month';
+}
+
+function editCalcSummary() {
+  const primary  = parseFloat(document.getElementById('edit-primary').value) || 0;
+  const srcAmts  = document.querySelectorAll('#edit-sources-list .a-src-amt');
+  let srcTotal   = 0;
+  srcAmts.forEach(inp => { srcTotal += parseFloat(inp.value) || 0; });
+  const total = primary + srcTotal;
+  document.getElementById('edit-total').textContent = fmt(total);
+  document.getElementById('edit-aam').textContent   = fmt(total * 0.0625);
+}
+
+function saveIncomeEdit() {
+  const p = loadProfile();
+  if (!p) return;
+  p.primaryIncome = sanitizeIncome(document.getElementById('edit-primary').value);
+  p.sources = [];
+  document.querySelectorAll('#edit-sources-list .a-source-item').forEach((div, i) => {
+    const name    = div.querySelector('.a-src-name-inp').value.trim() || ('Source ' + (i + 1));
+    const amount  = parseFloat(div.querySelector('.a-src-amt').value) || 0;
+    const recInp  = div.querySelector('.a-toggle-inp');
+    const recurring = recInp ? recInp.checked : true;
+    p.sources.push({ id: i + 1, name, amount, recurring });
+  });
+  saveProfile(p);
+  renderApp();
+  closeAScreen();
+}
+
+// ════════════════════════════════════════
+// PAYMENT STORAGE
+// ════════════════════════════════════════
+
+// ════════════════════════════════════════
+// MONTH STATUS LOGIC
+// Rules:
+//   PAID    = Chanda Aam/Wasiyyat paid AND all other chandas paid
+//   PARTIAL = Chanda Aam/Wasiyyat paid but some pledges unpaid
+//             OR pledges paid but Chanda Aam unpaid
+//   MISSED  = nothing paid at all
+// ════════════════════════════════════════
+
+function calcMonthStatus(chandaPaid, chandaDue, isMoosi) {
+  const aamPaid    = chandaPaid.aam    || 0;
+  const jalsaPaid  = chandaPaid.jalsa  || 0;
+  const tahrikPaid = chandaPaid.tahrik || 0;
+  const waqfPaid   = chandaPaid.waqf   || 0;
+  const khudamPaid = chandaPaid.khudam || 0;
+  const ijtamaPaid = chandaPaid.ijtema || 0;
+
+  const aamDue    = chandaDue.aam    || 0;
+  const jalsaDue  = chandaDue.jalsa  || 0;
+  const tahrikDue = chandaDue.tahrik || 0;
+  const waqfDue   = chandaDue.waqf   || 0;
+  const khudamDue = chandaDue.khudam || 0;
+  const ijtamaDue = chandaDue.ijtema || 0;
+
+  const totalPaid = aamPaid + jalsaPaid + tahrikPaid + waqfPaid + khudamPaid + ijtamaPaid;
+
+  // Nothing paid at all → missed
+  if (totalPaid === 0) return 'missed';
+
+  // Is Chanda Aam / Wasiyyat paid in full?
+  const aamFullyPaid = aamDue > 0 ? aamPaid >= aamDue : true;
+
+  // Are all other chandas fully paid?
+  const jalsaFullyPaid  = jalsaDue  > 0 ? jalsaPaid  >= jalsaDue  : true;
+  const tahrikFullyPaid = tahrikDue > 0 ? tahrikPaid >= tahrikDue : true;
+  const waqfFullyPaid   = waqfDue   > 0 ? waqfPaid   >= waqfDue   : true;
+  const khudamFullyPaid = khudamDue > 0 ? khudamPaid >= khudamDue : true;
+  const ijtamaFullyPaid = ijtamaDue > 0 ? ijtamaPaid >= ijtamaDue : true;
+  const allFullyPaid = jalsaFullyPaid && tahrikFullyPaid && waqfFullyPaid && khudamFullyPaid && ijtamaFullyPaid;
+
+  // Rule 1: Chanda Aam paid + ALL chandas paid → PAID
+  if (aamFullyPaid && allFullyPaid) return 'paid';
+
+  // Rule 2: Chanda Aam paid + pledges NOT fully paid → PARTIAL
+  // Rule 3: Chanda Aam NOT paid + anything else paid → PARTIAL
+  return 'partial';
+}
+
+function savePayments(payments) { localStorage.setItem('chandaPayments', JSON.stringify(payments)); }
+function loadPayments()         { try { const s = localStorage.getItem('chandaPayments'); return s ? JSON.parse(s) : []; } catch(e) { console.warn('Payments parse error:', e); return []; } }
+
+// month key = "2026-03"
+function getMonthKey() {
+  return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+}
+
+// ════════════════════════════════════════
+// MONTH SCROLLER STATE
+// ════════════════════════════════════════
+
+let selectedMonthKey  = getMonthKey();
+
+function parseKey(k) {
+  const [y, m] = k.split('-').map(Number);
+  return { year: y, month: m };
+}
+
+function toKey(y, m) {
+  return y + '-' + String(m).padStart(2, '0');
+}
+
+function keyToLabel(k) {
+  const { year, month } = parseKey(k);
+  return MONTHS[month - 1] + ' ' + year;
+}
+
+function changeMonth(delta) {
+  const p = loadProfile();
+  if (!p) return;
+  let { year, month } = parseKey(selectedMonthKey);
+  month += delta;
+  if (month < 1)  { month = 12; year--; }
+  if (month > 12) { month = 1;  year++; }
+  const newKey = toKey(year, month);
+  if (newKey > getMonthKey()) return;
+  if (newKey < earliestAllowedMonth()) return;
+  selectedMonthKey = newKey;
+  loadMonthIntoUI(selectedMonthKey);
+}
+
+// Allow navigation back 12 months from today, or joinMonth — whichever is earlier
+function earliestAllowedMonth() {
+  const nowKey = getMonthKey();
+  const { year: ny, month: nm } = parseKey(nowKey);
+  let ly = ny, lm = nm - 12;
+  if (lm < 1) { lm += 12; ly--; }
+  const limitKey = toKey(ly, lm);
+  const p = loadProfile();
+  // Use earlier of joinMonth and 12-month limit
+  return p && p.joinMonth < limitKey ? p.joinMonth : limitKey;
+}
+
+function loadMonthIntoUI(mk) {
+  const p        = loadProfile();
+  const c        = calcChandas(p);
+  const label    = keyToLabel(mk);
+  const payments = loadPayments();
+  const record   = payments.find(r => r.monthKey === mk);
+
+  document.getElementById('ms-month-label').textContent  = label;
+  document.getElementById('pay-month-title').textContent = label;
+  // Show which month's income this is based on
+  const cmSub = document.getElementById('pay-cm-sub');
+  if (cmSub) cmSub.textContent = 'Based on ' + prevMonthLabel(mk) + ' income';
+  // Update Chanda Aam / Wasiyyat label
+  const payAamNameEl = document.getElementById('pay-aam-name');
+  if (payAamNameEl) payAamNameEl.textContent = c.aamLabel;
+  const pcAamNameEl = document.getElementById('pc-aam-name');
+  if (pcAamNameEl) pcAamNameEl.textContent = c.aamLabel;
+
+  const prevBtn = document.getElementById('ms-prev');
+  const nextBtn = document.getElementById('ms-next');
+  const earliest = earliestAllowedMonth();
+  if (prevBtn) {
+    const canGoBack = mk > earliest;
+    prevBtn.disabled = !canGoBack;
+    prevBtn.style.opacity = canGoBack ? '1' : '0.25';
+    prevBtn.style.borderColor = canGoBack ? '' : 'var(--line)';
+  }
+  if (nextBtn) {
+    const canGoFwd = mk < getMonthKey();
+    nextBtn.disabled = !canGoFwd;
+    nextBtn.style.opacity = canGoFwd ? '1' : '0.25';
+    nextBtn.style.borderColor = canGoFwd ? '' : 'var(--line)';
+  }
+
+  ['btnPaid','btnPartial','btnMissed'].forEach(id => document.getElementById(id).className = 'ps-btn');
+  document.getElementById('partialWrap').className = 'partial-wrap';
+  Object.keys(chandaSelected).forEach(k => {
+    chandaSelected[k] = false;
+    const el = document.getElementById('pc-' + k);
+    if (el) el.classList.remove('checked');
+  });
+  updatePartialTotal();
+  currentStatus = null;
+
+  const badge    = document.getElementById('currBadge');
+  const msStatus = document.getElementById('ms-month-status');
+  const updateBar   = document.getElementById('update-payment-bar');
+  const logSection  = document.getElementById('pay-log-section');
+  const upbStatus   = document.getElementById('upb-status-text');
+
+  if (record) {
+    const statusLabel = record.status === 'paid' ? 'Paid' : record.status === 'partial' ? 'Partially Paid' : 'Missed';
+    badge.textContent = record.status === 'paid' ? 'Paid ✓' : record.status === 'partial' ? 'Partial' : 'Missed';
+    badge.className   = record.status === 'paid'    ? 'curr-status-badge csb-paid'
+                      : record.status === 'partial' ? 'curr-status-badge csb-partial'
+                      : 'curr-status-badge csb-unpaid';
+    msStatus.textContent = record.status === 'paid' ? 'Paid' : record.status === 'partial' ? 'Partial' : 'Missed';
+    msStatus.className   = 'ms-status ' + record.status;
+    // Show update bar, hide log form
+    if (updateBar)  { updateBar.style.display  = 'flex'; }
+    if (upbStatus)  { upbStatus.textContent = statusLabel; }
+    if (logSection) { logSection.style.display = 'none'; }
+  } else if (mk < getMonthKey()) {
+    badge.textContent = 'Not logged'; badge.className = 'curr-status-badge csb-unpaid';
+    msStatus.textContent = 'Not logged'; msStatus.className = 'ms-status missed';
+    // No record — show log form directly
+    if (updateBar)  { updateBar.style.display  = 'none'; }
+    if (logSection) { logSection.style.display = 'block'; }
+  } else {
+    badge.textContent = 'Unpaid'; badge.className = 'curr-status-badge csb-unpaid';
+    msStatus.textContent = 'Unpaid'; msStatus.className = 'ms-status unpaid';
+    if (updateBar)  { updateBar.style.display  = 'none'; }
+    if (logSection) { logSection.style.display = 'block'; }
+  }
+
+  // Base amounts due
+  const aamBase     = record ? record.chandaDue.aam    : c.aam;
+  const jalsaBase   = record ? record.chandaDue.jalsa  : c.jalsaMo;
+  const tahrikBase  = record ? record.chandaDue.tahrik : c.tahrikMo;
+  const waqfBase    = record ? record.chandaDue.waqf   : c.waqfMo;
+  const khudamBase  = record ? (record.chandaDue.khudam || 0) : c.khudamMo;
+  const ijtemaBase  = record ? (record.chandaDue.ijtema || 0) : c.ijtamaMo;
+
+  // Subtract already-paid amounts (from pledge full-pay or previous partial payments)
+  const alreadyPaid = record ? record.chandaPaid : {};
+  const aamAmt    = Math.max(0, aamBase    - (alreadyPaid.aam    || 0));
+  const jalsaAmt  = Math.max(0, jalsaBase  - (alreadyPaid.jalsa  || 0));
+  const tahrikAmt = Math.max(0, tahrikBase - (alreadyPaid.tahrik || 0));
+  const waqfAmt   = Math.max(0, waqfBase   - (alreadyPaid.waqf   || 0));
+  const khudamAmt = Math.max(0, khudamBase - (alreadyPaid.khudam || 0));
+  const ijtemaAmt = Math.max(0, ijtemaBase - (alreadyPaid.ijtema || 0));
+
+  document.getElementById('pay-aam').textContent       = fmt(aamAmt);
+  document.getElementById('pay-jalsa').textContent     = fmt(jalsaAmt);
+  document.getElementById('pay-tahrik').textContent    = fmt(tahrikAmt);
+  document.getElementById('pay-waqf').textContent      = fmt(waqfAmt);
+  const el = id => document.getElementById(id);
+  if (el('pay-khudam')) el('pay-khudam').textContent = fmt(khudamAmt);
+  if (el('pay-ijtema')) el('pay-ijtema').textContent = fmt(ijtemaAmt);
+  const grandDue = aamAmt + jalsaAmt + tahrikAmt + waqfAmt + khudamAmt + ijtemaAmt;
+  document.getElementById('pay-total').textContent     = fmt(grandDue);
+  document.getElementById('pc-aam-amt').textContent    = fmt(aamAmt) + ' due';
+  document.getElementById('pc-jalsa-amt').textContent  = fmt(jalsaAmt) + ' due';
+  document.getElementById('pc-tahrik-amt').textContent = fmt(tahrikAmt) + ' due';
+  document.getElementById('pc-waqf-amt').textContent   = fmt(waqfAmt) + ' due';
+  if (el('pc-khudam-amt')) el('pc-khudam-amt').textContent = fmt(khudamAmt) + ' due';
+  if (el('pc-ijtema-amt')) el('pc-ijtema-amt').textContent = fmt(ijtemaAmt) + ' due';
+
+  chandaAmounts = { aam: aamAmt, jalsa: jalsaAmt, tahrik: tahrikAmt, waqf: waqfAmt, khudam: khudamAmt, ijtema: ijtemaAmt };
+
+  // Hide partial checkbox rows for chandas already fully paid this month
+  const pcEl = id => document.getElementById(id);
+  ['aam','jalsa','tahrik','waqf','khudam','ijtema'].forEach(k => {
+    const row = pcEl('pc-' + k);
+    if (!row) return;
+    const due  = k === 'aam' ? aamAmt : k === 'jalsa' ? jalsaAmt : k === 'tahrik' ? tahrikAmt
+               : k === 'waqf' ? waqfAmt : k === 'khudam' ? khudamAmt : ijtemaAmt;
+    // Keep khudam/ijtema hidden if not applicable regardless
+    if (k === 'khudam' || k === 'ijtema') {
+      row.style.display = (c.khudamUser && due > 0) ? 'flex' : 'none';
+    } else {
+      row.style.display = due > 0 ? 'flex' : 'none';
+    }
+  });
+}
+
+function goToPaymentsMonth(mk) {
+  selectedMonthKey = mk;
+  goTo('payments');
+  setTimeout(() => loadMonthIntoUI(mk), 50);
+}
+
+// Clear a month's payment record so the user can re-log from scratch
+function resetMonthPayment() {
+  const mk       = selectedMonthKey;
+  const payments = loadPayments();
+  const idx      = payments.findIndex(r => r.monthKey === mk);
+  if (idx >= 0) {
+    payments.splice(idx, 1);
+    savePayments(payments);
+  }
+  loadMonthIntoUI(mk);
+  renderSummary();
+  renderPaymentHistory();
+  renderHomeCard();
+}
+
+// ════════════════════════════════════════
+// PAYMENTS UI
+// ════════════════════════════════════════
+
+let currentStatus    = null;
+let chandaAmounts    = { aam: 0, jalsa: 0, tahrik: 0, waqf: 0 };
+const chandaSelected = { aam: false, jalsa: false, tahrik: false, waqf: false };
+
+function setStatus(status) {
+  currentStatus = status;
+  ['btnPaid','btnPartial','btnMissed'].forEach(id => document.getElementById(id).className = 'ps-btn');
+  if (status === 'paid')    document.getElementById('btnPaid').className    = 'ps-btn paid-on';
+  if (status === 'partial') document.getElementById('btnPartial').className = 'ps-btn partial-on';
+  if (status === 'missed')  document.getElementById('btnMissed').className  = 'ps-btn missed-on';
+  document.getElementById('partialWrap').className = status === 'partial' ? 'partial-wrap show' : 'partial-wrap';
+  if (status !== 'partial') {
+    Object.keys(chandaSelected).forEach(k => {
+      chandaSelected[k] = false;
+      document.getElementById('pc-' + k).classList.remove('checked');
+    });
+    updatePartialTotal();
+  }
+  const badge = document.getElementById('currBadge');
+  if (status === 'paid')         { badge.textContent = 'Paid';    badge.className = 'curr-status-badge csb-paid'; }
+  else if (status === 'partial') { badge.textContent = 'Partial'; badge.className = 'curr-status-badge csb-partial'; }
+  else                           { badge.textContent = 'Missed';  badge.className = 'curr-status-badge csb-unpaid'; }
+}
+
+function toggleChanda(key) {
+  chandaSelected[key] = !chandaSelected[key];
+  document.getElementById('pc-' + key).classList.toggle('checked', chandaSelected[key]);
+  updatePartialTotal();
+}
+
+function updatePartialTotal() {
+  const total = Object.keys(chandaSelected).filter(k => chandaSelected[k]).reduce((s, k) => s + chandaAmounts[k], 0);
+  document.getElementById('partialTotal').textContent = fmt(total);
+}
+
+function savePayment() {
+  if (!currentStatus) { alert('Please select a payment status first.'); return; }
+  const mk       = selectedMonthKey;
+  const payments = loadPayments();
+  const existing = payments.findIndex(r => r.monthKey === mk);
+  const profile  = loadProfile();
+
+  // Get already-paid amounts (from prior pledge payments this month)
+  const priorPaid = existing >= 0 ? { ...payments[existing].chandaPaid } : {};
+  const priorDue  = existing >= 0 ? { ...payments[existing].chandaDue  } : {};
+
+  // chandaAmounts holds what's still REMAINING due this month
+  let newPaid = {}; // what user is paying NOW in this action
+
+  if (currentStatus === 'paid') {
+    // User paying all remaining amounts
+    newPaid = { ...chandaAmounts };
+  } else if (currentStatus === 'partial') {
+    const selected = Object.keys(chandaSelected).filter(k => chandaSelected[k]);
+    if (!selected.length) { alert('Please select at least one chanda that was paid.'); return; }
+    selected.forEach(k => { newPaid[k] = chandaAmounts[k]; });
+  } else {
+    // Missed — user explicitly marking as missed, record zero new payments
+    newPaid = { aam: 0, jalsa: 0, tahrik: 0, waqf: 0, khudam: 0, ijtema: 0 };
+  }
+
+  // Merge: total paid = prior paid + new paid for each chanda
+  const mergedPaid = {
+    aam:    (priorPaid.aam    || 0) + (newPaid.aam    || 0),
+    jalsa:  (priorPaid.jalsa  || 0) + (newPaid.jalsa  || 0),
+    tahrik: (priorPaid.tahrik || 0) + (newPaid.tahrik || 0),
+    waqf:   (priorPaid.waqf   || 0) + (newPaid.waqf   || 0),
+    khudam: (priorPaid.khudam || 0) + (newPaid.khudam || 0),
+    ijtema: (priorPaid.ijtema || 0) + (newPaid.ijtema || 0),
+  };
+
+  // Full due amounts (base, before any deductions)
+  const c = calcChandas(profile);
+  const fullDue = {
+    aam:    existing >= 0 ? (priorDue.aam    || c.aam)     : c.aam,
+    jalsa:  existing >= 0 ? (priorDue.jalsa  || c.jalsaMo) : c.jalsaMo,
+    tahrik: existing >= 0 ? (priorDue.tahrik || c.tahrikMo): c.tahrikMo,
+    waqf:   existing >= 0 ? (priorDue.waqf   || c.waqfMo)  : c.waqfMo,
+    khudam: existing >= 0 ? (priorDue.khudam || c.khudamMo): c.khudamMo,
+    ijtema: existing >= 0 ? (priorDue.ijtema || c.ijtamaMo): c.ijtamaMo,
+  };
+
+  const amountPaid = Object.values(mergedPaid).reduce((s, v) => s + v, 0);
+  const computedStatus = currentStatus === 'missed' ? 'missed'
+    : calcMonthStatus(mergedPaid, fullDue, profile.isMoosi);
+
+  const record = {
+    monthKey:    mk,
+    monthLabel:  keyToLabel(mk),
+    status:      computedStatus,
+    amountDue:   Object.values(fullDue).reduce((s, v) => s + v, 0),
+    amountPaid,
+    chandaPaid:  mergedPaid,
+    chandaDue:   fullDue,
+    savedAt:     new Date().toISOString(),
+  };
+
+  if (existing >= 0) { payments[existing] = record; }
+  else               { payments.push(record); }
+  savePayments(payments);
+
+  const badge    = document.getElementById('currBadge');
+  const msStatus = document.getElementById('ms-month-status');
+  badge.textContent = computedStatus === 'paid' ? 'Paid ✓' : computedStatus === 'partial' ? 'Partial ✓' : 'Missed';
+  badge.className   = computedStatus === 'paid'    ? 'curr-status-badge csb-paid'
+                    : computedStatus === 'partial' ? 'curr-status-badge csb-partial'
+                    : 'curr-status-badge csb-unpaid';
+  msStatus.textContent = computedStatus === 'paid' ? 'Paid' : computedStatus === 'partial' ? 'Partial' : 'Missed';
+  msStatus.className   = 'ms-status ' + computedStatus;
+
+  renderSummary();
+  renderPaymentHistory();
+  renderHomeCard();
+
+  ['btnPaid','btnPartial','btnMissed'].forEach(id => document.getElementById(id).className = 'ps-btn');
+  document.getElementById('partialWrap').className = 'partial-wrap';
+  Object.keys(chandaSelected).forEach(k => {
+    chandaSelected[k] = false;
+    const el = document.getElementById('pc-' + k);
+    if (el) el.classList.remove('checked');
+  });
+  currentStatus = null;
+
+  // Reload month UI + calendar to reflect saved state
+  loadMonthIntoUI(mk);
+}
+
+// ════════════════════════════════════════
+// RENDER PAYMENT HISTORY (all months from join)
+// ════════════════════════════════════════
+
+function renderPaymentHistory() {
+  const p        = loadProfile();
+  const payments = loadPayments();
+  const container = document.getElementById('payment-history');
+  if (!container || !p) return;
+
+  const allMonths = [];
+  let cur = p.joinMonth;
+  const nowKey = getMonthKey();
+  while (cur <= nowKey) {
+    allMonths.push(cur);
+    let { year, month } = parseKey(cur);
+    month++;
+    if (month > 12) { month = 1; year++; }
+    cur = toKey(year, month);
+  }
+  allMonths.reverse();
+
+  container.innerHTML = allMonths.map(mk => {
+    const rec   = payments.find(r => r.monthKey === mk);
+    const lbl   = keyToLabel(mk);
+    const isNow = mk === nowKey;
+    const isSel = mk === selectedMonthKey;
+
+    let dotClass, amtClass, amtLabel, subLabel;
+    if (rec) {
+      dotClass = rec.status === 'paid' ? 'dot-paid' : rec.status === 'partial' ? 'dot-partial' : 'dot-missed';
+      amtClass = rec.status;
+      amtLabel = rec.status === 'paid' ? fmt(rec.amountPaid) : rec.status === 'partial' ? fmt(rec.amountPaid) : '—';
+      subLabel = rec.status === 'paid' ? 'Fully paid' : rec.status === 'partial' ? 'Partial' : 'Missed';
+    } else {
+      dotClass = isNow ? '' : 'dot-missed';
+      amtClass = 'unpaid';
+      amtLabel = isNow ? 'Unpaid' : '—';
+      subLabel = isNow ? 'Not yet logged' : 'Not logged';
+    }
+
+    const rowStyle = isSel ? 'background:var(--green-l);' : '';
+    const dotStyle = !rec && isNow ? 'background:var(--line)' : '';
+
+    return `<div class="past-item" onclick="goToPaymentsMonth('${mk}')" style="${rowStyle}cursor:pointer;">
+      <div class="past-dot ${dotClass}" style="${dotStyle}"></div>
+      <div class="past-info">
+        <div class="past-month">${lbl}${isNow ? ' <span style="font-size:9px;background:var(--green-l);color:var(--green);padding:1px 6px;border-radius:4px;font-weight:700;">NOW</span>' : ''}</div>
+        <div class="past-sub">${rec ? 'Due ' + fmt(rec.amountDue) : 'Tap to log'}</div>
+      </div>
+      <div class="past-right">
+        <div class="past-amt ${amtClass}" style="${amtClass === 'unpaid' ? 'color:var(--soft)' : ''}">${amtLabel}</div>
+        <div class="past-status">${subLabel}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// RENDER SUMMARY FROM PAYMENT DATA
+// ════════════════════════════════════════
+
+function renderSummary() {
+  const p = loadProfile();
+  if (!p) return;
+  const c        = calcChandas(p);
+  const payments = loadPayments();
+
+  // Year boundaries — from join month for 12 months
+  const joinDate = new Date(p.joinMonth + '-01');
+  const yearEnd  = new Date(joinDate);
+  yearEnd.setFullYear(yearEnd.getFullYear() + 1);
+
+  // Filter payments within this chanda year
+  const yearPayments = payments.filter(pay => {
+    const d = new Date(pay.monthKey + '-01');
+    return d >= joinDate && d < yearEnd;
+  });
+
+  // Totals paid per chanda
+  const paidAam    = yearPayments.reduce((s,p) => s + (p.chandaPaid.aam    || 0), 0);
+  const paidJalsa  = yearPayments.reduce((s,p) => s + (p.chandaPaid.jalsa  || 0), 0);
+  const paidTahrik = yearPayments.reduce((s,p) => s + (p.chandaPaid.tahrik || 0), 0);
+  const paidWaqf   = yearPayments.reduce((s,p) => s + (p.chandaPaid.waqf   || 0), 0);
+  const paidKhudam = yearPayments.reduce((s,p) => s + (p.chandaPaid.khudam || 0), 0);
+  const paidIjtema = yearPayments.reduce((s,p) => s + (p.chandaPaid.ijtema || 0), 0);
+  const totalPaid  = paidAam + paidJalsa + paidTahrik + paidWaqf + paidKhudam + paidIjtema;
+
+  // Annual targets
+  const annualAam    = c.aam    * 12;
+  const annualJalsa  = c.jalsaAnn;
+  const annualTahrik = p.tahrikPledge || 0;
+  const annualWaqf   = p.waqfPledge   || 0;
+  const annualKhudam = c.khudamUser ? c.annualInc * 0.01  : 0;
+  const annualIjtema = c.khudamUser ? c.annualInc * 0.005 : 0;
+  const annualTotal  = annualAam + annualJalsa + annualTahrik + annualWaqf + annualKhudam + annualIjtema;
+
+  const pct = annualTotal > 0 ? Math.min(100, Math.round((totalPaid / annualTotal) * 100)) : 0;
+  const remaining = Math.max(0, annualTotal - totalPaid);
+
+  // Year range label
+  const startStr = SHORT[joinDate.getMonth()] + ' ' + joinDate.getFullYear();
+  const endDate  = new Date(yearEnd); endDate.setMonth(endDate.getMonth() - 1);
+  const endStr   = SHORT[endDate.getMonth()] + ' ' + endDate.getFullYear();
+  const rangeStr = startStr + ' – ' + endStr;
+
+  // Update DOM
+  document.getElementById('summary-year-label').textContent = rangeStr;
+  document.getElementById('sum-year-range').textContent     = rangeStr;
+  document.getElementById('sum-paid').textContent           = fmt(totalPaid);
+  document.getElementById('sum-total').textContent          = fmt(annualTotal);
+  document.getElementById('sum-pct').textContent            = pct + '% complete';
+  document.getElementById('sum-remaining').textContent      = fmt(remaining) + ' remaining';
+  document.getElementById('sum-prog-fill').style.width      = pct + '%';
+
+  // Per chanda
+  document.getElementById('sum-aam-paid').textContent   = fmt(paidAam);
+  document.getElementById('sum-aam-of').textContent     = 'of ' + fmt(annualAam);
+  const aamPct = annualAam > 0 ? Math.min(100, Math.round((paidAam / annualAam) * 100)) : 0;
+  document.getElementById('sum-aam-bar').style.width    = aamPct + '%';
+
+  document.getElementById('sum-jalsa-paid').textContent  = fmt(paidJalsa);
+  document.getElementById('sum-jalsa-of').textContent    = 'of ' + fmt(annualJalsa);
+  const jalsaPct = annualJalsa > 0 ? Math.min(100, Math.round((paidJalsa / annualJalsa) * 100)) : 0;
+  document.getElementById('sum-jalsa-bar').style.width   = jalsaPct + '%';
+
+  document.getElementById('sum-tahrik-paid').textContent = fmt(paidTahrik);
+  document.getElementById('sum-tahrik-of').textContent   = 'of ' + fmt(annualTahrik);
+  const tahrikPct = annualTahrik > 0 ? Math.min(100, Math.round((paidTahrik / annualTahrik) * 100)) : 0;
+  document.getElementById('sum-tahrik-bar').style.width  = tahrikPct + '%';
+
+  document.getElementById('sum-waqf-paid').textContent  = fmt(paidWaqf);
+  document.getElementById('sum-waqf-of').textContent    = 'of ' + fmt(annualWaqf);
+  const waqfPct = annualWaqf > 0 ? Math.min(100, Math.round((paidWaqf / annualWaqf) * 100)) : 0;
+  document.getElementById('sum-waqf-bar').style.width   = waqfPct + '%';
+
+  // Khudam rows
+  const khudamAnnual = c.khudamUser ? c.annualInc * 0.01  : 0;
+  const ijtemaAnnual = c.khudamUser ? c.annualInc * 0.005 : 0;
+  const sumKhudamRow = document.getElementById('sum-khudam-row');
+  const sumIjtemaRow = document.getElementById('sum-ijtema-row');
+  if (sumKhudamRow) sumKhudamRow.style.display = c.khudamUser ? 'block' : 'none';
+  if (sumIjtemaRow) sumIjtemaRow.style.display = c.khudamUser ? 'block' : 'none';
+  if (c.khudamUser) {
+    document.getElementById('sum-khudam-paid').textContent = fmt(paidKhudam);
+    document.getElementById('sum-khudam-of').textContent   = 'of ' + fmt(khudamAnnual);
+    const khudamPct = khudamAnnual > 0 ? Math.min(100, Math.round((paidKhudam / khudamAnnual) * 100)) : 0;
+    document.getElementById('sum-khudam-bar').style.width  = khudamPct + '%';
+    document.getElementById('sum-ijtema-paid').textContent = fmt(paidIjtema);
+    document.getElementById('sum-ijtema-of').textContent   = 'of ' + fmt(ijtemaAnnual);
+    const ijtamaPct = ijtemaAnnual > 0 ? Math.min(100, Math.round((paidIjtema / ijtemaAnnual) * 100)) : 0;
+    document.getElementById('sum-ijtema-bar').style.width  = ijtamaPct + '%';
+  }
+
+  // Ring on home
+  const ringDashOffset = 220 - (220 * pct / 100);
+  const ringEl = document.getElementById('ring-fill-el');
+  if (ringEl) ringEl.style.strokeDashoffset = ringDashOffset;
+  const ringPctEl = document.getElementById('ring-pct');
+  if (ringPctEl) ringPctEl.textContent = pct + '%';
+  const ringPaidEl = document.getElementById('ring-paid');
+  if (ringPaidEl) ringPaidEl.textContent = fmt(totalPaid) + ' paid';
+  const ringOfEl = document.getElementById('ring-of');
+  if (ringOfEl) ringOfEl.textContent = 'of ' + fmt(annualTotal) + ' annual total';
+  const ringRemEl = document.getElementById('ring-remaining');
+  if (ringRemEl) ringRemEl.textContent = fmt(remaining) + ' remaining';
+
+  // Home stats
+  const statPct = document.getElementById('stat-year-pct');
+  if (statPct) statPct.textContent = pct + '%';
+  const statOut = document.getElementById('stat-outstanding');
+  if (statOut) statOut.textContent = fmt(remaining);
+  const statMo = document.getElementById('stat-months');
+  if (statMo) statMo.textContent = yearPayments.filter(p => p.status === 'paid').length + '/12';
+
+  // Projection
+  const projEl = document.getElementById('sum-projection');
+  if (projEl) {
+    if (totalPaid === 0) {
+      projEl.textContent = 'Complete your first payment to see your year projection.';
+    } else {
+      const monthsIn  = yearPayments.length || 1;
+      const pace      = totalPaid / monthsIn;
+      const projected = Math.round(Math.min(pace * 12, annualTotal) * 100) / 100;
+      projEl.innerHTML = pct >= 100
+        ? 'Congratulations! You have completed your full chanda year.'
+        : 'Based on your payments so far, you are on track to pay <strong>' + fmt(projected) + '</strong> by end of your chanda year.';
+    }
+  }
+
+  // Month grid
+  const grid = document.getElementById('sum-month-grid');
+  if (grid) {
+    const nowKey    = getMonthKey();
+    const gridMonths = [];
+    let cur = p.joinMonth;
+    const gridEnd = new Date(joinDate); gridEnd.setFullYear(gridEnd.getFullYear() + 1);
+    const gridEndKey = toKey(gridEnd.getFullYear(), gridEnd.getMonth() + 1);
+    while (cur < gridEndKey) {
+      gridMonths.push(cur);
+      let { year, month } = parseKey(cur);
+      month++;
+      if (month > 12) { month = 1; year++; }
+      cur = toKey(year, month);
+    }
+
+    grid.innerHTML = gridMonths.map(mk => {
+      const rec    = payments.find(r => r.monthKey === mk);
+      const { month } = parseKey(mk);
+      const shortName = SHORT[month - 1];
+      const isCurrent = mk === nowKey;
+      const isFuture  = mk > nowKey;
+
+      let tileClass, statusLabel;
+      if (isFuture)       { tileClass = 'mg-tile mg-upcoming';  statusLabel = '—'; }
+      else if (isCurrent && !rec) { tileClass = 'mg-tile mg-current clickable'; statusLabel = 'Now'; }
+      else if (!rec)      { tileClass = 'mg-tile mg-missed clickable';   statusLabel = 'Missed'; }
+      else if (rec.status === 'paid')    { tileClass = 'mg-tile mg-paid clickable';    statusLabel = 'Paid'; }
+      else if (rec.status === 'partial') { tileClass = 'mg-tile mg-partial clickable'; statusLabel = 'Partial'; }
+      else                               { tileClass = 'mg-tile mg-missed clickable';  statusLabel = 'Missed'; }
+
+      const clickAttr = isFuture ? '' : `onclick="goToPaymentsMonth('${mk}')"`;
+      const nowDot    = isCurrent ? '<div class="now-dot"></div>' : '';
+
+      return `<div class="${tileClass}" ${clickAttr}>${nowDot}<span class="mg-name">${shortName}</span><span class="mg-status">${statusLabel}</span></div>`;
+    }).join('');
+  }
+}
+
+// ════════════════════════════════════════
+// WASIYYAT
+// ════════════════════════════════════════
+
+function toggleMoosi() {
+  const on = document.getElementById('moosiToggle').checked;
+  document.getElementById('moosiOffState').style.display = on ? 'none'  : 'block';
+  document.getElementById('moosiOnState').style.display  = on ? 'block' : 'none';
+  // Save to profile and recalculate everything
+  const p = loadProfile();
+  if (!p) return;
+  p.isMoosi = on;
+  if (on && !p.wasiyyatRate) p.wasiyyatRate = 12.5; // default rate
+  saveProfile(p);
+  renderApp();
+}
+
+function setRate(chip, rate) {
+  chip.closest('.rate-chips').querySelectorAll('.rate-chip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+  // Save rate to profile and recalculate if Moosi is on
+  const p = loadProfile();
+  if (!p) return;
+  p.wasiyyatRate = parseFloat(rate);
+  saveProfile(p);
+  if (p.isMoosi) renderApp();
+}
+
+// ════════════════════════════════════════
+// REMINDERS
+// ════════════════════════════════════════
+
+function toggleRemTime(id, cb) {
+  const panel = document.getElementById('rtp-' + id);
+  if (panel) panel.classList.toggle('show', cb.checked);
+}
+
+function pickTime(chip) {
+  chip.closest('.rem-time-pick').querySelectorAll('.rtp-chip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+}
+
+// ════════════════════════════════════════
+// PLEDGE UPDATE (Tahrik & Waqf)
+// ════════════════════════════════════════
+
+function togglePledgeEdit(id) {
+  const panel = document.getElementById('pledge-edit-' + id);
+  const btn   = document.getElementById('btn-update-' + id);
+  const isOpen = panel.classList.contains('open');
+
+  // Close any other open panels first
+  document.querySelectorAll('.pledge-edit-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.pledge-update-btn').forEach(b => b.classList.remove('active'));
+
+  if (!isOpen) {
+    const p = loadProfile();
+    const currentAnnual = id === 'tahrik' ? (p.tahrikPledge || 0) : (p.waqfPledge || 0);
+    const input = document.getElementById('pledge-input-' + id);
+    input.value = currentAnnual > 0 ? currentAnnual : '';
+    pledgeLivePreview(id);
+    panel.classList.add('open');
+    btn.classList.add('active');
+    setTimeout(() => input.focus(), 50);
+  }
+}
+
+function pledgeLivePreview(id) {
+  const input   = document.getElementById('pledge-input-' + id);
+  const annual  = parseFloat(input.value) || 0;
+  const prevEl  = document.getElementById('pledge-preview-' + id);
+  const moEl    = document.getElementById('pledge-mo-' + id);
+  if (annual > 0) {
+    prevEl.style.display = 'block';
+    moEl.textContent = fmt(annual / 12);
+  } else {
+    prevEl.style.display = 'none';
+  }
+}
+
+function savePledge(id) {
+  const input  = document.getElementById('pledge-input-' + id);
+  const annual = parseFloat(input.value) || 0;
+
+  const p = loadProfile();
+  if (id === 'tahrik') { p.tahrikPledge = annual; }
+  else                 { p.waqfPledge   = annual; }
+  saveProfile(p);
+
+  // Close panel
+  document.getElementById('pledge-edit-' + id).classList.remove('open');
+  document.getElementById('btn-update-' + id).classList.remove('active');
+
+  // Recalculate everything
+  renderApp();
+  renderSummary();
+}
+
+// ════════════════════════════════════════
+// PLEDGE PAYMENT FLOW (Monthly or Annual)
+// ════════════════════════════════════════
+
+function togglePledgePay(id) {
+  const panel   = document.getElementById('pledge-pay-' + id);
+  const btn     = document.getElementById('btn-pay-' + id);
+  const isOpen  = panel.classList.contains('open');
+
+  // Close all other pay and edit panels first
+  document.querySelectorAll('.pledge-pay-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.pledge-edit-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.pledge-pay-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pledge-update-btn').forEach(b => b.classList.remove('active'));
+
+  if (!isOpen) {
+    panel.classList.add('open');
+    btn.classList.add('active');
+    // Populate amounts
+    pledgePayTypeChange(id);
+  }
+}
+
+function pledgePayTypeChange(id) {
+  const p       = loadProfile();
+  const pledge  = id === 'tahrik' ? (p.tahrikPledge || 0) : (p.waqfPledge || 0);
+  const monthly = pledge / 12;
+
+  // Update displayed amounts
+  const moEl  = document.getElementById('pledge-pay-mo-' + id);
+  const annEl = document.getElementById('pledge-pay-ann-' + id);
+  if (moEl)  moEl.textContent  = fmt(monthly);
+  if (annEl) annEl.textContent = fmt(pledge);
+}
+
+function savePledgePayment(id) {
+  const p      = loadProfile();
+  if (!p) return;
+  const pledge = id === 'tahrik' ? (p.tahrikPledge || 0) : (p.waqfPledge || 0);
+  const monthly = pledge / 12;
+
+  if (pledge <= 0) {
+    alert('No pledge amount set. Please set your pledge amount first using the edit button.');
+    return;
+  }
+
+  // Which payment type is selected?
+  const radios   = document.querySelectorAll('input[name="pledge-pay-type-' + id + '"]');
+  let payType    = 'monthly';
+  radios.forEach(r => { if (r.checked) payType = r.value; });
+
+  const payments  = loadPayments();
+  const nowKey    = getMonthKey();
+
+  // Pledge year boundaries
+  // Tahrik: Nov–Oct, Waqf: Jan–Dec
+  const pledgeStart = getPledgeYearStart(id);
+  const pledgeEnd   = getPledgeYearEnd(id);
+
+  if (payType === 'monthly') {
+    // Record just the current month's instalment for this pledge
+    recordPledgeMonth(id, nowKey, monthly, payments);
+    payments._dirty = true;
+  } else {
+    // Full annual — mark every month in the pledge year
+    let cur = pledgeStart;
+    while (cur <= pledgeEnd) {
+      recordPledgeMonth(id, cur, monthly, payments);
+      let { year, month } = parseKey(cur);
+      month++;
+      if (month > 12) { month = 1; year++; }
+      cur = toKey(year, month);
+    }
+  }
+
+  // Remove the internal flag before saving
+  delete payments._dirty;
+  savePayments(payments);
+
+  // Close panel
+  togglePledgePay(id);
+
+  // Refresh
+  renderSummary();
+  renderPaymentHistory();
+
+  const label = id === 'tahrik' ? 'Tahrik-e-Jadid' : 'Waqf-e-Jadid';
+  const msg   = payType === 'annual'
+    ? `✓ ${label} full annual pledge recorded across all months.`
+    : `✓ ${label} monthly payment recorded for ${keyToLabel(nowKey)}.`;
+  alert(msg);
+}
+
+// Record a single chanda's payment for a given month
+// Merges into existing record if the month already has a payment
+function recordPledgeMonth(chandaId, mk, amount, payments) {
+  const existing = payments.findIndex(r => r.monthKey === mk);
+  if (existing >= 0) {
+    // Merge into existing record
+    payments[existing].chandaPaid[chandaId] = (payments[existing].chandaPaid[chandaId] || 0) + amount;
+    payments[existing].amountPaid = Object.values(payments[existing].chandaPaid).reduce((s, v) => s + v, 0);
+    // Recalculate status using priority rules
+    payments[existing].status = calcMonthStatus(
+      payments[existing].chandaPaid,
+      payments[existing].chandaDue,
+      loadProfile().isMoosi
+    );
+  } else {
+    // Create a new minimal record for this month
+    const p  = loadProfile();
+    const c  = calcChandas(p);
+    const chandaDue  = { aam: c.aam, jalsa: c.jalsaMo, tahrik: c.tahrikMo, waqf: c.waqfMo, khudam: c.khudamMo, ijtema: c.ijtamaMo };
+    const chandaPaid = { aam: 0, jalsa: 0, tahrik: 0, waqf: 0, khudam: 0, ijtema: 0 };
+    chandaPaid[chandaId] = amount;
+    const amountPaid = amount;
+    const amountDue  = c.grandMo;
+    payments.push({
+      monthKey:   mk,
+      monthLabel: keyToLabel(mk),
+      status:     calcMonthStatus(chandaPaid, chandaDue, loadProfile().isMoosi),
+      amountDue,
+      amountPaid,
+      chandaPaid,
+      chandaDue,
+      savedAt: new Date().toISOString(),
+    });
+  }
+}
+
+// Get pledge year start key for a given pledge
+function getPledgeYearStart(id) {
+  const now = new Date();
+  const yr  = now.getFullYear();
+  const mo  = now.getMonth() + 1; // 1-based
+
+  if (id === 'tahrik') {
+    // Nov 1 – Oct 31. If current month is Nov or later, year starts this year
+    return mo >= 11 ? toKey(yr, 11) : toKey(yr - 1, 11);
+  } else {
+    // Jan 1 – Dec 31
+    return toKey(yr, 1);
+  }
+}
+
+function getPledgeYearEnd(id) {
+  const start = getPledgeYearStart(id);
+  const { year, month } = parseKey(start);
+  if (id === 'tahrik') {
+    // Nov start → ends Oct next year
+    return toKey(year + 1, 10);
+  } else {
+    // Jan start → ends Dec same year
+    return toKey(year, 12);
+  }
+}
+</script>
+
+<script>
+// ── PWA: Inline Service Worker via Blob ──
+const SW_VERSION = 'chanda-tracker-v1';
+const CACHE_NAME = SW_VERSION;
+
+const swCode = `
+const CACHE_NAME = '${SW_VERSION}';
+const ASSETS = ['/'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') return response;
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        return response;
+      }).catch(() => caches.match('/'));
+    })
+  );
+});
+`;
+
+if ('serviceWorker' in navigator) {
+  // Try proper sw.js file first (works on Vercel/server)
+  // Fall back to blob URL (works when opening HTML file directly)
+  navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    .then(reg => console.log('SW registered via /sw.js'))
+    .catch(() => {
+      // Fallback: blob URL for local file usage
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl)
+        .then(() => console.log('SW registered via blob'))
+        .catch(err => console.log('SW not available:', err));
+    });
+}
+
+// ── PWA: Inline Manifest via Blob ──
+const manifest = {
+  name: 'Chanda Tracker',
+  short_name: 'Chanda',
+  description: 'Track your religious financial obligations for Ahmadiyya Muslim Community',
+  start_url: '/',
+  display: 'standalone',
+  background_color: '#d8d8d4',
+  theme_color: '#2d6a4f',
+  orientation: 'portrait',
+  icons: [
+    {
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%232d6a4f'/><text y='.85em' font-size='380' x='60'>☪</text></svg>",
+      sizes: '512x512',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }
+  ]
+};
+
+const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+const manifestUrl = URL.createObjectURL(manifestBlob);
+const manifestLink = document.querySelector('link[rel="manifest"]');
+if (manifestLink) manifestLink.href = manifestUrl;
+
+// ── PWA: Install prompt ──
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button if available
+  const installBtn = document.getElementById('pwa-install-btn');
+  if (installBtn) installBtn.style.display = 'flex';
+});
+
+window.addEventListener('appinstalled', () => {
+  const installBtn = document.getElementById('pwa-install-btn');
+  if (installBtn) installBtn.style.display = 'none';
+  deferredPrompt = null;
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      deferredPrompt = null;
+    });
+  }
+}
+</script>
+</body>
+</html>
