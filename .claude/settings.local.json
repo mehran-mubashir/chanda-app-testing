@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv public/index.html .)",
+      "Bash(mv public/manifest.json .)",
+      "Bash(mv public/sw.js .)",
+      "Bash(rmdir public:*)"
+    ]
+  }
+}
