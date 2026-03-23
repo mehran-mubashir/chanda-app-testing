@@ -33,8 +33,11 @@
     --red-l:   #fdf3f3;
     --amber:   #d97706;
     --amber-l: #fffbeb;
-    --blue:    #3a5fa0;
-    --blue-l:  #f0f4fd;
+    --blue:     #3a5fa0;
+    --blue-l:   #f0f4fd;
+    --purple:   #7c3aed;
+    --purple-l: #f5f3ff;
+    --purple-m: #ddd6fe;
   }
 
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -1726,6 +1729,24 @@
   color: var(--blue);
 }
 
+.slabel-badge.lajna {
+  background: var(--purple-l);
+  color: var(--purple);
+}
+
+.ch-icon.purple {
+  background: var(--purple-l);
+}
+
+.rate-tag.purple {
+  background: var(--purple-l);
+  color: var(--purple);
+}
+
+.tr-val.purple {
+  color: var(--purple);
+}
+
 /* DOB input date style fix */
 input[type="date"].ob-input {
   color: var(--ink);
@@ -2082,6 +2103,23 @@ input[type="date"].ob-input {
           <input class="ob-input" id="ob-dob" type="date" style="padding:11px 12px;font-size:14px;">
           <div class="ob-hint">Used to determine your chanda category. Stored only on your device.</div>
         </div>
+        <div class="ob-card" style="margin-top:12px;">
+          <label class="ob-label">Gender</label>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+            <label class="ob-choice-card">
+              <input type="radio" name="ob-gender" value="male" checked>
+              <div class="ob-choice-content">
+                <div class="ob-choice-title">Male</div>
+              </div>
+            </label>
+            <label class="ob-choice-card">
+              <input type="radio" name="ob-gender" value="female">
+              <div class="ob-choice-content">
+                <div class="ob-choice-title">Female</div>
+              </div>
+            </label>
+          </div>
+        </div>
         <button class="ob-btn" onclick="obNext(1)">Get Started →</button>
         <div class="ob-error" id="ob-err-1"></div>
       </div>
@@ -2256,6 +2294,8 @@ input[type="date"].ob-input {
           <div class="qpay-row" id="home-waqf-row"><div class="qpay-left"><span class="qpay-name">Waqf-e-Jadid</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-waqf">£ 0.00</span><span class="qpay-status qs-due">Due</span></div></div>
           <div class="qpay-row" id="home-khudam-row" style="display:none;"><div class="qpay-left"><span class="qpay-name" style="color:var(--blue);">Khudam Chanda</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-khudam">£ 0.00</span><span class="qpay-status" style="background:var(--blue-l);color:var(--blue);">Due</span></div></div>
           <div class="qpay-row" id="home-ijtema-row" style="display:none;"><div class="qpay-left"><span class="qpay-name" style="color:var(--blue);">Khudam Ijtema</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-ijtema">£ 0.00</span><span class="qpay-status" style="background:var(--blue-l);color:var(--blue);">Due</span></div></div>
+          <div class="qpay-row" id="home-lajna-row" style="display:none;"><div class="qpay-left"><span class="qpay-name" style="color:var(--purple);">Lajna Chanda</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-lajna">£ 0.00</span><span class="qpay-status" style="background:var(--purple-l);color:var(--purple);">Due</span></div></div>
+          <div class="qpay-row" id="home-ijtema-lajna-row" style="display:none;"><div class="qpay-left"><span class="qpay-name" style="color:var(--purple);">Lajna Ijtema</span></div><div style="display:flex;align-items:center;gap:10px;"><span class="qpay-amt" id="home-ijtema-lajna">£ 0.00</span><span class="qpay-status" style="background:var(--purple-l);color:var(--purple);">Due</span></div></div>
           <div class="qpay-total"><span class="qt-label">Grand Total / Month</span><span class="qt-amt" id="home-total">£ 0.00</span></div>
           <button class="pay-now-btn" onclick="goTo('payments')">Log Payment →</button>
         </div>
@@ -2390,10 +2430,35 @@ input[type="date"].ob-input {
               <div class="total-row highlight"><div class="tr-left"><div class="tr-dot" style="background:var(--ink)"></div><span class="tr-name bold">Total / month</span></div><span class="tr-val" id="ch-tr-aux">£ 0.00</span></div>
             </div>
           </div>
-          <div id="aux-na-section" style="display:none;">
+          <div id="aux-lajna-section" style="display:none;">
+            <div class="slabel">Lajna Imaillah <span class="slabel-badge lajna">Female 15+</span></div>
+            <div class="chanda-card">
+              <div class="chanda-row"><div class="ch-info"><div class="ch-name">Lajna Chanda</div><div class="ch-desc"><span class="rate-tag purple">1%</span> of annual income · Jan–Dec</div></div><div class="ch-amounts"><div class="ch-primary" id="ch-lajna">£ 0.00</div><div class="ch-secondary">per month</div><div class="ch-secondary" id="ch-lajna-ann" style="color:var(--purple);font-size:10px;margin-top:1px;">£ 0.00 / yr</div></div></div>
+              <div class="chanda-row"><div class="ch-info"><div class="ch-name">Lajna Ijtema</div><div class="ch-desc"><span class="rate-tag purple">Fixed</span> £35/year · Jan–Dec</div></div><div class="ch-amounts"><div class="ch-primary" id="ch-ijtema-lajna">£ 0.00</div><div class="ch-secondary">per month</div><div class="ch-secondary" id="ch-ijtema-lajna-ann" style="color:var(--purple);font-size:10px;margin-top:1px;">£ 0.00 / yr</div></div></div>
+            </div>
+            <div class="total-card">
+              <div class="total-top"><div class="total-label">Auxiliary Total</div><div class="total-main" id="ch-lajna-total">£ 0.00</div><div class="total-sub-t">Monthly auxiliary chandas</div></div>
+              <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--purple)"></div><span class="tr-name">Lajna Chanda / month</span></div><span class="tr-val purple" id="ch-tr-lajna">£ 0.00</span></div>
+              <div class="total-row"><div class="tr-left"><div class="tr-dot" style="background:var(--purple);opacity:.6"></div><span class="tr-name">Lajna Ijtema / month</span></div><span class="tr-val purple" id="ch-tr-ijtema-lajna">£ 0.00</span></div>
+              <div class="total-row highlight"><div class="tr-left"><div class="tr-dot" style="background:var(--ink)"></div><span class="tr-name bold">Total / month</span></div><span class="tr-val" id="ch-tr-lajna-aux">£ 0.00</span></div>
+            </div>
+          </div>
+          <div id="aux-atfal-section" style="display:none;">
             <div style="background:var(--blue-l);border:1px solid #c7d7f5;border-radius:12px;padding:20px 18px;text-align:center;margin-top:4px;">
               <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;">Not applicable</div>
-              <div style="font-size:12px;color:var(--soft);line-height:1.6;">Auxiliary chandas for Khudam ul Ahmadiyya apply to male members aged <strong>15–40</strong>.</div>
+              <div style="font-size:12px;color:var(--soft);line-height:1.6;">You are currently in Atfal (under 15). Khudam chandas apply to male members aged <strong>15–40</strong>.</div>
+            </div>
+          </div>
+          <div id="aux-ansarullah-section" style="display:none;">
+            <div style="background:var(--blue-l);border:1px solid #c7d7f5;border-radius:12px;padding:20px 18px;text-align:center;margin-top:4px;">
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;">Not applicable</div>
+              <div style="font-size:12px;color:var(--soft);line-height:1.6;">You are currently in Ansarullah (over 40). Khudam chandas apply to male members aged <strong>15–40</strong>.</div>
+            </div>
+          </div>
+          <div id="aux-nasirat-section" style="display:none;">
+            <div style="background:var(--purple-l);border:1px solid var(--purple-m);border-radius:12px;padding:20px 18px;text-align:center;margin-top:4px;">
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;">Not applicable</div>
+              <div style="font-size:12px;color:var(--soft);line-height:1.6;">You are currently in Nasirat (under 15). Lajna chandas apply to female members aged <strong>15 and above</strong>.</div>
             </div>
           </div>
         </div>
@@ -2426,6 +2491,8 @@ input[type="date"].ob-input {
             <div class="cm-row"><span class="cm-row-name">Waqf-e-Jadid</span><span class="cm-row-amt" id="pay-waqf">£ 0.00</span></div>
             <div class="cm-row" id="pay-khudam-row" style="display:none;"><span class="cm-row-name" style="color:var(--blue);">Khudam Chanda</span><span class="cm-row-amt" id="pay-khudam">£ 0.00</span></div>
             <div class="cm-row" id="pay-ijtema-row" style="display:none;"><span class="cm-row-name" style="color:var(--blue);">Khudam Ijtema</span><span class="cm-row-amt" id="pay-ijtema">£ 0.00</span></div>
+            <div class="cm-row" id="pay-lajna-row" style="display:none;"><span class="cm-row-name" style="color:var(--purple);">Lajna Chanda</span><span class="cm-row-amt" id="pay-lajna">£ 0.00</span></div>
+            <div class="cm-row" id="pay-ijtema-lajna-row" style="display:none;"><span class="cm-row-name" style="color:var(--purple);">Lajna Ijtema</span><span class="cm-row-amt" id="pay-ijtema-lajna">£ 0.00</span></div>
             <div class="cm-total-row"><span class="cm-total-label">Total Due</span><span class="cm-total-amt" id="pay-total">£ 0.00</span></div>
           </div>
           <div class="pay-action">
@@ -2448,6 +2515,8 @@ input[type="date"].ob-input {
               <div class="partial-chanda-row" id="pc-waqf" onclick="toggleChanda('waqf')"><div class="pc-row-left"><div><div class="pc-row-name">Waqf-e-Jadid</div><div class="pc-row-amt" id="pc-waqf-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
               <div class="partial-chanda-row" id="pc-khudam" style="display:none;" onclick="toggleChanda('khudam')"><div class="pc-row-left"><div><div class="pc-row-name">Khudam Chanda</div><div class="pc-row-amt" id="pc-khudam-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
               <div class="partial-chanda-row" id="pc-ijtema" style="display:none;" onclick="toggleChanda('ijtema')"><div class="pc-row-left"><div><div class="pc-row-name">Khudam Ijtema</div><div class="pc-row-amt" id="pc-ijtema-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-lajna" style="display:none;" onclick="toggleChanda('lajna')"><div class="pc-row-left"><div><div class="pc-row-name">Lajna Chanda</div><div class="pc-row-amt" id="pc-lajna-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
+              <div class="partial-chanda-row" id="pc-ijtema-lajna" style="display:none;" onclick="toggleChanda('ijtema-lajna')"><div class="pc-row-left"><div><div class="pc-row-name">Lajna Ijtema</div><div class="pc-row-amt" id="pc-ijtema-lajna-amt">£ 0.00 due</div></div></div><div class="pc-checkbox">✓</div></div>
               <div class="partial-total-row"><span class="pt-label">Amount recorded as paid</span><span class="pt-amt" id="partialTotal">£ 0.00</span></div>
             </div>
             <button class="save-btn" onclick="savePayment()">Save Payment</button>
@@ -2480,6 +2549,8 @@ input[type="date"].ob-input {
           <div class="breakdown-row"><div class="br-top"><div class="br-left"><span class="br-name">Waqf-e-Jadid</span></div><div class="br-right"><div class="br-paid" style="color:var(--gold);" id="sum-waqf-paid">£ 0.00</div><div class="br-of" id="sum-waqf-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill gold" id="sum-waqf-bar" style="width:0%"></div></div></div>
           <div class="breakdown-row" id="sum-khudam-row" style="display:none;"><div class="br-top"><div class="br-left"><span class="br-name">Khudam Chanda</span></div><div class="br-right"><div class="br-paid" style="color:var(--blue);" id="sum-khudam-paid">£ 0.00</div><div class="br-of" id="sum-khudam-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill" style="background:var(--blue);" id="sum-khudam-bar" style="width:0%"></div></div></div>
           <div class="breakdown-row" id="sum-ijtema-row" style="display:none;"><div class="br-top"><div class="br-left"><span class="br-name">Khudam Ijtema</span></div><div class="br-right"><div class="br-paid" style="color:var(--blue);" id="sum-ijtema-paid">£ 0.00</div><div class="br-of" id="sum-ijtema-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill" style="background:var(--blue);" id="sum-ijtema-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row" id="sum-lajna-row" style="display:none;"><div class="br-top"><div class="br-left"><span class="br-name">Lajna Chanda</span></div><div class="br-right"><div class="br-paid" style="color:var(--purple);" id="sum-lajna-paid">£ 0.00</div><div class="br-of" id="sum-lajna-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill" style="background:var(--purple);" id="sum-lajna-bar" style="width:0%"></div></div></div>
+          <div class="breakdown-row" id="sum-ijtema-lajna-row" style="display:none;"><div class="br-top"><div class="br-left"><span class="br-name">Lajna Ijtema</span></div><div class="br-right"><div class="br-paid" style="color:var(--purple);" id="sum-ijtema-lajna-paid">£ 0.00</div><div class="br-of" id="sum-ijtema-lajna-of">of £ 0.00</div></div></div><div class="br-bar-track"><div class="br-bar-fill" style="background:var(--purple);" id="sum-ijtema-lajna-bar" style="width:0%"></div></div></div>
         </div>
         <div class="projection-card"><div class="proj-text" id="sum-projection">Complete your first payment to see your year projection.</div></div>
         <div class="slabel">Month by Month</div>
@@ -2649,7 +2720,12 @@ function getAge(dob) {
 
 function isKhudam(profile) {
   const age = getAge(profile.dob);
-  return age !== null && age >= 15 && age <= 40;
+  return profile.gender === 'male' && age !== null && age >= 15 && age <= 40;
+}
+
+function isLajna(profile) {
+  const age = getAge(profile.dob);
+  return profile.gender === 'female' && age !== null && age >= 15;
 }
 
 // ── CHANDA CALCULATIONS ──────────────────
@@ -2665,22 +2741,29 @@ function calcChandas(profile) {
   const tahrikMo   = (profile.tahrikPledge || 0) / 12;
   const waqfMo     = (profile.waqfPledge  || 0) / 12;
   // Auxiliary — Khudam (based on annual income)
-  const annualInc  = total * 12;
-  const khudamUser = isKhudam(profile);
-  const khudamMo   = khudamUser ? annualInc * 0.01  / 12 : 0;
-  const ijtamaMo   = khudamUser ? annualInc * 0.005 / 12 : 0;
-  const grandMo    = aam + jalsaMo + tahrikMo + waqfMo + khudamMo + ijtamaMo;
+  const annualInc   = total * 12;
+  const khudamUser  = isKhudam(profile);
+  const khudamMo    = khudamUser ? annualInc * 0.01  / 12 : 0;
+  const ijtamaMo    = khudamUser ? annualInc * 0.005 / 12 : 0;
+  // Auxiliary — Lajna (1% annual income + £35 ijtema)
+  const isLajnaUser    = isLajna(profile);
+  const lajnaMo        = isLajnaUser ? (annualInc * 0.01) / 12 : 0;
+  const ijtemaLajnaMo  = isLajnaUser ? 35 / 12 : 0;
+  const grandMo    = aam + jalsaMo + tahrikMo + waqfMo + khudamMo + ijtamaMo + lajnaMo + ijtemaLajnaMo;
   const annualTotal = aam * 12 + jalsaAnn
                     + (profile.tahrikPledge || 0)
                     + (profile.waqfPledge   || 0)
                     + (khudamUser ? annualInc * 0.01  : 0)
-                    + (khudamUser ? annualInc * 0.005 : 0);
+                    + (khudamUser ? annualInc * 0.005 : 0)
+                    + (isLajnaUser ? annualInc * 0.01 : 0)
+                    + (isLajnaUser ? 35 : 0);
   return {
     total, annualInc,
     aam, aamLabel, aamRate, isMoosi,
     jalsaAnn, jalsaMo,
     tahrikMo, waqfMo,
     khudamUser, khudamMo, ijtamaMo,
+    isLajnaUser, lajnaMo, ijtemaLajnaMo,
     grandMo, annualTotal,
   };
 }
@@ -2795,11 +2878,16 @@ function renderApp() {
   // ── Drawer name
   document.getElementById('drawer-name').textContent = p.name;
 
-  // ── Auxiliary (Khudam) elements ──
-  const khudamEl = document.getElementById('aux-khudam-section');
-  const naEl     = document.getElementById('aux-na-section');
-  if (khudamEl) khudamEl.style.display = c.khudamUser ? 'block' : 'none';
-  if (naEl)     naEl.style.display     = c.khudamUser ? 'none'  : 'block';
+  // ── Auxiliary section visibility based on gender and age ──
+  const age     = getAge(p.dob);
+  const isMale   = p.gender === 'male';
+  const isFemale = p.gender === 'female';
+  const showSection = (id, visible) => { const s = document.getElementById(id); if (s) s.style.display = visible ? 'block' : 'none'; };
+  showSection('aux-khudam-section',    isMale   && age !== null && age >= 15 && age <= 40);
+  showSection('aux-lajna-section',     isFemale && age !== null && age >= 15);
+  showSection('aux-atfal-section',     isMale   && age !== null && age < 15);
+  showSection('aux-ansarullah-section',isMale   && age !== null && age > 40);
+  showSection('aux-nasirat-section',   isFemale && age !== null && age < 15);
 
   // Chandas tab auxiliary
   const el = (id) => document.getElementById(id);
@@ -2813,6 +2901,15 @@ function renderApp() {
   if (el('ch-tr-khudam'))   el('ch-tr-khudam').textContent   = fmt(c.khudamMo);
   if (el('ch-tr-ijtema'))   el('ch-tr-ijtema').textContent   = fmt(c.ijtamaMo);
   if (el('ch-tr-aux'))      el('ch-tr-aux').textContent      = fmt(c.khudamMo + c.ijtamaMo);
+  // Lajna elements
+  if (el('ch-lajna'))          el('ch-lajna').textContent          = fmt(c.lajnaMo);
+  if (el('ch-lajna-ann'))      el('ch-lajna-ann').textContent      = fmt(c.lajnaMo * 12) + ' / yr';
+  if (el('ch-ijtema-lajna'))   el('ch-ijtema-lajna').textContent   = fmt(c.ijtemaLajnaMo);
+  if (el('ch-ijtema-lajna-ann')) el('ch-ijtema-lajna-ann').textContent = fmt(35) + ' / yr';
+  if (el('ch-lajna-total'))    el('ch-lajna-total').textContent    = fmt(c.lajnaMo + c.ijtemaLajnaMo);
+  if (el('ch-tr-lajna'))       el('ch-tr-lajna').textContent       = fmt(c.lajnaMo);
+  if (el('ch-tr-ijtema-lajna')) el('ch-tr-ijtema-lajna').textContent = fmt(c.ijtemaLajnaMo);
+  if (el('ch-tr-lajna-aux'))   el('ch-tr-lajna-aux').textContent   = fmt(c.lajnaMo + c.ijtemaLajnaMo);
   // Grand total rows in Auxiliary tab
   if (el('ch-all-tr-khudam')) el('ch-all-tr-khudam').textContent = fmt(c.khudamMo);
   if (el('ch-all-tr-ijtema')) el('ch-all-tr-ijtema').textContent = fmt(c.ijtamaMo);
@@ -2832,6 +2929,14 @@ function renderApp() {
   if (el('pc-ijtema'))  el('pc-ijtema').style.display  = c.khudamUser ? 'flex' : 'none';
   if (el('pc-khudam-amt')) el('pc-khudam-amt').textContent = fmt(c.khudamMo) + ' due';
   if (el('pc-ijtema-amt')) el('pc-ijtema-amt').textContent = fmt(c.ijtamaMo) + ' due';
+  // Payments tab Lajna rows
+  ['pay-lajna-row','pay-ijtema-lajna-row'].forEach(id => {
+    if (el(id)) el(id).style.display = c.isLajnaUser ? 'flex' : 'none';
+  });
+  if (el('pc-lajna'))        el('pc-lajna').style.display        = c.isLajnaUser ? 'flex' : 'none';
+  if (el('pc-ijtema-lajna')) el('pc-ijtema-lajna').style.display = c.isLajnaUser ? 'flex' : 'none';
+  if (el('pc-lajna-amt'))        el('pc-lajna-amt').textContent        = fmt(c.lajnaMo) + ' due';
+  if (el('pc-ijtema-lajna-amt')) el('pc-ijtema-lajna-amt').textContent = fmt(c.ijtemaLajnaMo) + ' due';
 
   // ── Sync Wasiyyat screen UI to profile state
   const moosiToggle = document.getElementById('moosiToggle');
@@ -2884,17 +2989,25 @@ function renderHomeCard() {
   const jalsaRem  = Math.max(0, c.jalsaMo  - (paid.jalsa  || 0));
   const tahrikRem = Math.max(0, c.tahrikMo - (paid.tahrik || 0));
   const waqfRem   = Math.max(0, c.waqfMo   - (paid.waqf   || 0));
-  const khudamRem = Math.max(0, c.khudamMo - (paid.khudam || 0));
-  const ijtemaRem = Math.max(0, c.ijtamaMo - (paid.ijtema || 0));
-  const totalRem  = aamRem + jalsaRem + tahrikRem + waqfRem + khudamRem + ijtemaRem;
+  const khudamRem      = Math.max(0, c.khudamMo      - (paid.khudam             || 0));
+  const ijtemaRem      = Math.max(0, c.ijtamaMo      - (paid.ijtema             || 0));
+  const lajnaRem       = Math.max(0, c.lajnaMo       - (paid.lajna              || 0));
+  const ijtemaLajnaRem = Math.max(0, c.ijtemaLajnaMo - (paid['ijtema-lajna']    || 0));
+  const totalRem  = aamRem + jalsaRem + tahrikRem + waqfRem + khudamRem + ijtemaRem + lajnaRem + ijtemaLajnaRem;
 
   const el = id => document.getElementById(id);
   if (el('home-aam'))    el('home-aam').textContent    = fmt(aamRem);
   if (el('home-jalsa'))  el('home-jalsa').textContent  = fmt(jalsaRem);
   if (el('home-tahrik')) el('home-tahrik').textContent = fmt(tahrikRem);
   if (el('home-waqf'))   el('home-waqf').textContent   = fmt(waqfRem);
-  if (el('home-khudam')) el('home-khudam').textContent = fmt(khudamRem);
-  if (el('home-ijtema')) el('home-ijtema').textContent = fmt(ijtemaRem);
+  if (el('home-khudam'))      el('home-khudam').textContent      = fmt(khudamRem);
+  if (el('home-ijtema'))      el('home-ijtema').textContent      = fmt(ijtemaRem);
+  const homeLajnaRow      = el('home-lajna-row');
+  const homeIjtemaLajnaRow = el('home-ijtema-lajna-row');
+  if (homeLajnaRow)       homeLajnaRow.style.display       = c.isLajnaUser ? 'flex' : 'none';
+  if (homeIjtemaLajnaRow) homeIjtemaLajnaRow.style.display = c.isLajnaUser ? 'flex' : 'none';
+  if (el('home-lajna'))        el('home-lajna').textContent        = fmt(lajnaRem);
+  if (el('home-ijtema-lajna')) el('home-ijtema-lajna').textContent = fmt(ijtemaLajnaRem);
   if (el('home-total'))  el('home-total').textContent  = fmt(totalRem);
   if (el('hero-due'))    el('hero-due').textContent    = fmt(totalRem);
 
@@ -2917,8 +3030,10 @@ function renderHomeCard() {
   setBadge('home-jalsa-row',  jalsaRem);
   setBadge('home-tahrik-row', tahrikRem);
   setBadge('home-waqf-row',   waqfRem);
-  setBadge('home-khudam-row', khudamRem);
-  setBadge('home-ijtema-row', ijtemaRem);
+  setBadge('home-khudam-row',      khudamRem);
+  setBadge('home-ijtema-row',      ijtemaRem);
+  setBadge('home-lajna-row',       lajnaRem);
+  setBadge('home-ijtema-lajna-row',ijtemaLajnaRem);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -2960,6 +3075,8 @@ function obNext(from) {
     if (!name) { obError(1, 'Please enter your name.'); return; }
     const dobVal = document.getElementById('ob-dob').value;
     if (!dobVal) { obError(1, 'Please enter your date of birth.'); return; }
+    const genderVal = document.querySelector('input[name="ob-gender"]:checked');
+    if (!genderVal) { obError(1, 'Please select your gender.'); return; }
     obShowStep(2);
   } else if (from === 2) {
     const primary = parseFloat(document.getElementById('ob-primary').value) || 0;
@@ -3163,9 +3280,11 @@ function obFinish() {
   const rateInput = document.getElementById('ob-wasiyyat-rate-input');
   const wasiyyatRate = isMoosi ? Math.min(33, parseFloat(rateInput ? rateInput.value : 10) || 10) : 10;
 
+  const genderRadio = document.querySelector('input[name="ob-gender"]:checked');
   const profile = {
     name:          document.getElementById('ob-name').value.trim(),
     dob:           document.getElementById('ob-dob').value || null,
+    gender:        genderRadio ? genderRadio.value : 'male',
     primaryIncome: sanitizeIncome(document.getElementById('ob-primary').value),
     sources:       obSources.slice(),
     tahrikPledge:  sanitizePledge(document.getElementById('ob-tahrik').value),
@@ -3196,6 +3315,9 @@ function obReset() {
   const waqfMo   = document.getElementById('ob-waqf-mo');
   if (tahrikMo) tahrikMo.style.display = 'none';
   if (waqfMo)   waqfMo.style.display   = 'none';
+  // Reset gender selection
+  const genderRadio = document.querySelector('input[name="ob-gender"][value="male"]');
+  if (genderRadio) genderRadio.checked = true;
   // Reset Wasiyyat selection
   const noRadio = document.querySelector('input[name="ob-wasiyyat"][value="no"]');
   if (noRadio) noRadio.checked = true;
@@ -3540,46 +3662,55 @@ function loadMonthIntoUI(mk) {
   const jalsaBase   = record ? record.chandaDue.jalsa  : c.jalsaMo;
   const tahrikBase  = record ? record.chandaDue.tahrik : c.tahrikMo;
   const waqfBase    = record ? record.chandaDue.waqf   : c.waqfMo;
-  const khudamBase  = record ? (record.chandaDue.khudam || 0) : c.khudamMo;
-  const ijtemaBase  = record ? (record.chandaDue.ijtema || 0) : c.ijtamaMo;
+  const khudamBase     = record ? (record.chandaDue.khudam || 0) : c.khudamMo;
+  const ijtemaBase     = record ? (record.chandaDue.ijtema || 0) : c.ijtamaMo;
+  const lajnaBase      = record ? (record.chandaDue.lajna || 0) : c.lajnaMo;
+  const ijtemaLajnaBase = record ? (record.chandaDue['ijtema-lajna'] || 0) : c.ijtemaLajnaMo;
 
   // Subtract already-paid amounts (from pledge full-pay or previous partial payments)
   const alreadyPaid = record ? record.chandaPaid : {};
-  const aamAmt    = Math.max(0, aamBase    - (alreadyPaid.aam    || 0));
-  const jalsaAmt  = Math.max(0, jalsaBase  - (alreadyPaid.jalsa  || 0));
-  const tahrikAmt = Math.max(0, tahrikBase - (alreadyPaid.tahrik || 0));
-  const waqfAmt   = Math.max(0, waqfBase   - (alreadyPaid.waqf   || 0));
-  const khudamAmt = Math.max(0, khudamBase - (alreadyPaid.khudam || 0));
-  const ijtemaAmt = Math.max(0, ijtemaBase - (alreadyPaid.ijtema || 0));
+  const aamAmt         = Math.max(0, aamBase         - (alreadyPaid.aam              || 0));
+  const jalsaAmt       = Math.max(0, jalsaBase       - (alreadyPaid.jalsa            || 0));
+  const tahrikAmt      = Math.max(0, tahrikBase      - (alreadyPaid.tahrik           || 0));
+  const waqfAmt        = Math.max(0, waqfBase        - (alreadyPaid.waqf             || 0));
+  const khudamAmt      = Math.max(0, khudamBase      - (alreadyPaid.khudam           || 0));
+  const ijtemaAmt      = Math.max(0, ijtemaBase      - (alreadyPaid.ijtema           || 0));
+  const lajnaAmt       = Math.max(0, lajnaBase       - (alreadyPaid.lajna            || 0));
+  const ijtemaLajnaAmt = Math.max(0, ijtemaLajnaBase - (alreadyPaid['ijtema-lajna']  || 0));
 
   document.getElementById('pay-aam').textContent       = fmt(aamAmt);
   document.getElementById('pay-jalsa').textContent     = fmt(jalsaAmt);
   document.getElementById('pay-tahrik').textContent    = fmt(tahrikAmt);
   document.getElementById('pay-waqf').textContent      = fmt(waqfAmt);
   const el = id => document.getElementById(id);
-  if (el('pay-khudam')) el('pay-khudam').textContent = fmt(khudamAmt);
-  if (el('pay-ijtema')) el('pay-ijtema').textContent = fmt(ijtemaAmt);
-  const grandDue = aamAmt + jalsaAmt + tahrikAmt + waqfAmt + khudamAmt + ijtemaAmt;
+  if (el('pay-khudam'))       el('pay-khudam').textContent       = fmt(khudamAmt);
+  if (el('pay-ijtema'))       el('pay-ijtema').textContent       = fmt(ijtemaAmt);
+  if (el('pay-lajna'))        el('pay-lajna').textContent        = fmt(lajnaAmt);
+  if (el('pay-ijtema-lajna')) el('pay-ijtema-lajna').textContent = fmt(ijtemaLajnaAmt);
+  const grandDue = aamAmt + jalsaAmt + tahrikAmt + waqfAmt + khudamAmt + ijtemaAmt + lajnaAmt + ijtemaLajnaAmt;
   document.getElementById('pay-total').textContent     = fmt(grandDue);
   document.getElementById('pc-aam-amt').textContent    = fmt(aamAmt) + ' due';
   document.getElementById('pc-jalsa-amt').textContent  = fmt(jalsaAmt) + ' due';
   document.getElementById('pc-tahrik-amt').textContent = fmt(tahrikAmt) + ' due';
   document.getElementById('pc-waqf-amt').textContent   = fmt(waqfAmt) + ' due';
-  if (el('pc-khudam-amt')) el('pc-khudam-amt').textContent = fmt(khudamAmt) + ' due';
-  if (el('pc-ijtema-amt')) el('pc-ijtema-amt').textContent = fmt(ijtemaAmt) + ' due';
+  if (el('pc-khudam-amt'))       el('pc-khudam-amt').textContent       = fmt(khudamAmt) + ' due';
+  if (el('pc-ijtema-amt'))       el('pc-ijtema-amt').textContent       = fmt(ijtemaAmt) + ' due';
+  if (el('pc-lajna-amt'))        el('pc-lajna-amt').textContent        = fmt(lajnaAmt) + ' due';
+  if (el('pc-ijtema-lajna-amt')) el('pc-ijtema-lajna-amt').textContent = fmt(ijtemaLajnaAmt) + ' due';
 
-  chandaAmounts = { aam: aamAmt, jalsa: jalsaAmt, tahrik: tahrikAmt, waqf: waqfAmt, khudam: khudamAmt, ijtema: ijtemaAmt };
+  chandaAmounts = { aam: aamAmt, jalsa: jalsaAmt, tahrik: tahrikAmt, waqf: waqfAmt, khudam: khudamAmt, ijtema: ijtemaAmt, lajna: lajnaAmt, 'ijtema-lajna': ijtemaLajnaAmt };
 
   // Hide partial checkbox rows for chandas already fully paid this month
   const pcEl = id => document.getElementById(id);
-  ['aam','jalsa','tahrik','waqf','khudam','ijtema'].forEach(k => {
+  ['aam','jalsa','tahrik','waqf','khudam','ijtema','lajna','ijtema-lajna'].forEach(k => {
     const row = pcEl('pc-' + k);
     if (!row) return;
-    const due  = k === 'aam' ? aamAmt : k === 'jalsa' ? jalsaAmt : k === 'tahrik' ? tahrikAmt
-               : k === 'waqf' ? waqfAmt : k === 'khudam' ? khudamAmt : ijtemaAmt;
-    // Keep khudam/ijtema hidden if not applicable regardless
+    const dueMap = { aam: aamAmt, jalsa: jalsaAmt, tahrik: tahrikAmt, waqf: waqfAmt, khudam: khudamAmt, ijtema: ijtemaAmt, lajna: lajnaAmt, 'ijtema-lajna': ijtemaLajnaAmt };
+    const due = dueMap[k];
     if (k === 'khudam' || k === 'ijtema') {
       row.style.display = (c.khudamUser && due > 0) ? 'flex' : 'none';
+    } else if (k === 'lajna' || k === 'ijtema-lajna') {
+      row.style.display = (c.isLajnaUser && due > 0) ? 'flex' : 'none';
     } else {
       row.style.display = due > 0 ? 'flex' : 'none';
     }
@@ -3613,7 +3744,7 @@ function resetMonthPayment() {
 
 let currentStatus    = null;
 let chandaAmounts    = { aam: 0, jalsa: 0, tahrik: 0, waqf: 0 };
-const chandaSelected = { aam: false, jalsa: false, tahrik: false, waqf: false };
+const chandaSelected = { aam: false, jalsa: false, tahrik: false, waqf: false, khudam: false, ijtema: false, lajna: false, 'ijtema-lajna': false };
 
 function setStatus(status) {
   currentStatus = status;
@@ -3669,17 +3800,19 @@ function savePayment() {
     selected.forEach(k => { newPaid[k] = chandaAmounts[k]; });
   } else {
     // Missed — user explicitly marking as missed, record zero new payments
-    newPaid = { aam: 0, jalsa: 0, tahrik: 0, waqf: 0, khudam: 0, ijtema: 0 };
+    newPaid = { aam: 0, jalsa: 0, tahrik: 0, waqf: 0, khudam: 0, ijtema: 0, lajna: 0, 'ijtema-lajna': 0 };
   }
 
   // Merge: total paid = prior paid + new paid for each chanda
   const mergedPaid = {
-    aam:    (priorPaid.aam    || 0) + (newPaid.aam    || 0),
-    jalsa:  (priorPaid.jalsa  || 0) + (newPaid.jalsa  || 0),
-    tahrik: (priorPaid.tahrik || 0) + (newPaid.tahrik || 0),
-    waqf:   (priorPaid.waqf   || 0) + (newPaid.waqf   || 0),
-    khudam: (priorPaid.khudam || 0) + (newPaid.khudam || 0),
-    ijtema: (priorPaid.ijtema || 0) + (newPaid.ijtema || 0),
+    aam:             (priorPaid.aam             || 0) + (newPaid.aam             || 0),
+    jalsa:           (priorPaid.jalsa           || 0) + (newPaid.jalsa           || 0),
+    tahrik:          (priorPaid.tahrik          || 0) + (newPaid.tahrik          || 0),
+    waqf:            (priorPaid.waqf            || 0) + (newPaid.waqf            || 0),
+    khudam:          (priorPaid.khudam          || 0) + (newPaid.khudam          || 0),
+    ijtema:          (priorPaid.ijtema          || 0) + (newPaid.ijtema          || 0),
+    lajna:           (priorPaid.lajna           || 0) + (newPaid.lajna           || 0),
+    'ijtema-lajna':  (priorPaid['ijtema-lajna'] || 0) + (newPaid['ijtema-lajna'] || 0),
   };
 
   // Full due amounts (base, before any deductions)
@@ -3689,8 +3822,10 @@ function savePayment() {
     jalsa:  existing >= 0 ? (priorDue.jalsa  || c.jalsaMo) : c.jalsaMo,
     tahrik: existing >= 0 ? (priorDue.tahrik || c.tahrikMo): c.tahrikMo,
     waqf:   existing >= 0 ? (priorDue.waqf   || c.waqfMo)  : c.waqfMo,
-    khudam: existing >= 0 ? (priorDue.khudam || c.khudamMo): c.khudamMo,
-    ijtema: existing >= 0 ? (priorDue.ijtema || c.ijtamaMo): c.ijtamaMo,
+    khudam:          existing >= 0 ? (priorDue.khudam             || c.khudamMo)      : c.khudamMo,
+    ijtema:          existing >= 0 ? (priorDue.ijtema             || c.ijtamaMo)      : c.ijtamaMo,
+    lajna:           existing >= 0 ? (priorDue.lajna              || c.lajnaMo)       : c.lajnaMo,
+    'ijtema-lajna':  existing >= 0 ? (priorDue['ijtema-lajna']    || c.ijtemaLajnaMo) : c.ijtemaLajnaMo,
   };
 
   const amountPaid = Object.values(mergedPaid).reduce((s, v) => s + v, 0);
@@ -3822,18 +3957,22 @@ function renderSummary() {
   const paidJalsa  = yearPayments.reduce((s,p) => s + (p.chandaPaid.jalsa  || 0), 0);
   const paidTahrik = yearPayments.reduce((s,p) => s + (p.chandaPaid.tahrik || 0), 0);
   const paidWaqf   = yearPayments.reduce((s,p) => s + (p.chandaPaid.waqf   || 0), 0);
-  const paidKhudam = yearPayments.reduce((s,p) => s + (p.chandaPaid.khudam || 0), 0);
-  const paidIjtema = yearPayments.reduce((s,p) => s + (p.chandaPaid.ijtema || 0), 0);
-  const totalPaid  = paidAam + paidJalsa + paidTahrik + paidWaqf + paidKhudam + paidIjtema;
+  const paidKhudam      = yearPayments.reduce((s,p) => s + (p.chandaPaid.khudam              || 0), 0);
+  const paidIjtema      = yearPayments.reduce((s,p) => s + (p.chandaPaid.ijtema              || 0), 0);
+  const paidLajna       = yearPayments.reduce((s,p) => s + (p.chandaPaid.lajna               || 0), 0);
+  const paidIjtemaLajna = yearPayments.reduce((s,p) => s + (p.chandaPaid['ijtema-lajna']     || 0), 0);
+  const totalPaid  = paidAam + paidJalsa + paidTahrik + paidWaqf + paidKhudam + paidIjtema + paidLajna + paidIjtemaLajna;
 
   // Annual targets
   const annualAam    = c.aam    * 12;
   const annualJalsa  = c.jalsaAnn;
   const annualTahrik = p.tahrikPledge || 0;
   const annualWaqf   = p.waqfPledge   || 0;
-  const annualKhudam = c.khudamUser ? c.annualInc * 0.01  : 0;
-  const annualIjtema = c.khudamUser ? c.annualInc * 0.005 : 0;
-  const annualTotal  = annualAam + annualJalsa + annualTahrik + annualWaqf + annualKhudam + annualIjtema;
+  const annualKhudam     = c.khudamUser  ? c.annualInc * 0.01  : 0;
+  const annualIjtema     = c.khudamUser  ? c.annualInc * 0.005 : 0;
+  const lajnaAnnual      = c.isLajnaUser ? c.lajnaMo * 12 : 0;
+  const ijtemaLajnaAnnual = c.isLajnaUser ? 35 : 0;
+  const annualTotal  = annualAam + annualJalsa + annualTahrik + annualWaqf + annualKhudam + annualIjtema + lajnaAnnual + ijtemaLajnaAnnual;
 
   const pct = annualTotal > 0 ? Math.min(100, Math.round((totalPaid / annualTotal) * 100)) : 0;
   const remaining = Math.max(0, annualTotal - totalPaid);
@@ -3883,13 +4022,27 @@ function renderSummary() {
   if (sumIjtemaRow) sumIjtemaRow.style.display = c.khudamUser ? 'block' : 'none';
   if (c.khudamUser) {
     document.getElementById('sum-khudam-paid').textContent = fmt(paidKhudam);
-    document.getElementById('sum-khudam-of').textContent   = 'of ' + fmt(khudamAnnual);
-    const khudamPct = khudamAnnual > 0 ? Math.min(100, Math.round((paidKhudam / khudamAnnual) * 100)) : 0;
+    document.getElementById('sum-khudam-of').textContent   = 'of ' + fmt(annualKhudam);
+    const khudamPct = annualKhudam > 0 ? Math.min(100, Math.round((paidKhudam / annualKhudam) * 100)) : 0;
     document.getElementById('sum-khudam-bar').style.width  = khudamPct + '%';
     document.getElementById('sum-ijtema-paid').textContent = fmt(paidIjtema);
-    document.getElementById('sum-ijtema-of').textContent   = 'of ' + fmt(ijtemaAnnual);
-    const ijtamaPct = ijtemaAnnual > 0 ? Math.min(100, Math.round((paidIjtema / ijtemaAnnual) * 100)) : 0;
+    document.getElementById('sum-ijtema-of').textContent   = 'of ' + fmt(annualIjtema);
+    const ijtamaPct = annualIjtema > 0 ? Math.min(100, Math.round((paidIjtema / annualIjtema) * 100)) : 0;
     document.getElementById('sum-ijtema-bar').style.width  = ijtamaPct + '%';
+  }
+  const sumLajnaRow      = document.getElementById('sum-lajna-row');
+  const sumIjtemaLajnaRow = document.getElementById('sum-ijtema-lajna-row');
+  if (sumLajnaRow)       sumLajnaRow.style.display      = c.isLajnaUser ? 'block' : 'none';
+  if (sumIjtemaLajnaRow) sumIjtemaLajnaRow.style.display = c.isLajnaUser ? 'block' : 'none';
+  if (c.isLajnaUser) {
+    document.getElementById('sum-lajna-paid').textContent      = fmt(paidLajna);
+    document.getElementById('sum-lajna-of').textContent        = 'of ' + fmt(lajnaAnnual);
+    const lajnaPct = lajnaAnnual > 0 ? Math.min(100, Math.round((paidLajna / lajnaAnnual) * 100)) : 0;
+    document.getElementById('sum-lajna-bar').style.width       = lajnaPct + '%';
+    document.getElementById('sum-ijtema-lajna-paid').textContent = fmt(paidIjtemaLajna);
+    document.getElementById('sum-ijtema-lajna-of').textContent   = 'of ' + fmt(ijtemaLajnaAnnual);
+    const ijtemaLajnaPct = ijtemaLajnaAnnual > 0 ? Math.min(100, Math.round((paidIjtemaLajna / ijtemaLajnaAnnual) * 100)) : 0;
+    document.getElementById('sum-ijtema-lajna-bar').style.width  = ijtemaLajnaPct + '%';
   }
 
   // Ring on home
