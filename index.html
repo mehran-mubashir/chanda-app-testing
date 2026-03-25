@@ -1743,6 +1743,9 @@
 .ob-sum-val.blue {
   color: var(--blue);
 }
+.ob-sum-val.purple {
+  color: var(--purple);
+}
 
 .slabel-badge.lajna {
   background: var(--purple-l);
@@ -2265,6 +2268,8 @@ input[type="date"].ob-input {
           <div class="ob-sum-row"><span class="ob-sum-name">Waqf-e-Jadid</span><span class="ob-sum-val gold" id="ob-sum-waqf">£ 0.00 / mo</span></div>
           <div class="ob-sum-row" id="ob-sum-khudam-row" style="display:none;"><span class="ob-sum-name">Khudam Chanda</span><span class="ob-sum-val blue" id="ob-sum-khudam">£ 0.00 / mo</span></div>
           <div class="ob-sum-row" id="ob-sum-ijtema-row" style="display:none;"><span class="ob-sum-name">Khudam Ijtema</span><span class="ob-sum-val blue" id="ob-sum-ijtema">£ 0.00 / mo</span></div>
+          <div class="ob-sum-row" id="ob-sum-lajna-row" style="display:none;"><span class="ob-sum-name">Lajna Chanda</span><span class="ob-sum-val purple" id="ob-sum-lajna">£ 0.00 / mo</span></div>
+          <div class="ob-sum-row" id="ob-sum-ijtema-lajna-row" style="display:none;"><span class="ob-sum-name">Lajna Ijtema</span><span class="ob-sum-val purple" id="ob-sum-ijtema-lajna">£ 0.00 / mo</span></div>
           <div class="ob-sum-divider"></div>
           <div class="ob-sum-row total"><span class="ob-sum-name" style="font-weight:700;color:var(--ink);">Total / month</span><span class="ob-sum-val" id="ob-sum-total">£ 0.00</span></div>
         </div>
@@ -2660,7 +2665,12 @@ input[type="date"].ob-input {
         <div id="moosiOnState" style="display:none;">
           <div style="background:var(--green-l);border:1px solid var(--green-m);border-radius:9px;padding:12px 13px;margin-bottom:12px;font-size:11px;color:var(--green);line-height:1.5;"><strong>Moosi enabled.</strong> Wasiyyat replaces Chanda Aam across all screens.</div>
           <div class="a-slabel">Wasiyyat Rate</div>
-          <div class="a-card"><div class="rate-chips"><span class="rate-chip" onclick="setRate(this,'10%')">10%</span><span class="rate-chip on" onclick="setRate(this,'12.5%')">12.5%</span><span class="rate-chip" onclick="setRate(this,'15%')">15%</span><span class="rate-chip" onclick="setRate(this,'20%')">20%</span><span class="rate-chip" onclick="setRate(this,'25%')">25%</span><span class="rate-chip" onclick="setRate(this,'33%')">33%</span></div></div>
+          <div class="a-card">
+            <div class="a-row-label" style="font-size:12px;color:var(--soft);margin-bottom:8px;">Enter your Wasiyyat rate (1–33%)</div>
+            <input class="ob-input ob-num" id="settings-wasiyyat-rate" type="number" placeholder="12.5" min="1" max="33" step="0.5" inputmode="decimal" oninput="setRate()">
+            <div class="ob-error" id="settings-wasiyyat-err" style="margin-top:6px;"></div>
+            <div style="margin-top:8px;font-size:12px;color:var(--soft);" id="settings-wasiyyat-preview"></div>
+          </div>
         </div>
         <button class="save-changes-btn" onclick="closeAScreen()">Save Changes</button>
       </div>
@@ -3015,12 +3025,16 @@ function renderHomeCard() {
   if (el('home-jalsa'))  el('home-jalsa').textContent  = fmt(jalsaRem);
   if (el('home-tahrik')) el('home-tahrik').textContent = fmt(tahrikRem);
   if (el('home-waqf'))   el('home-waqf').textContent   = fmt(waqfRem);
-  if (el('home-khudam'))      el('home-khudam').textContent      = fmt(khudamRem);
-  if (el('home-ijtema'))      el('home-ijtema').textContent      = fmt(ijtemaRem);
-  const homeLajnaRow      = el('home-lajna-row');
+  const homeKhudamRow      = el('home-khudam-row');
+  const homeIjtemaRow      = el('home-ijtema-row');
+  const homeLajnaRow       = el('home-lajna-row');
   const homeIjtemaLajnaRow = el('home-ijtema-lajna-row');
+  if (homeKhudamRow)      homeKhudamRow.style.display      = c.khudamUser  ? 'flex' : 'none';
+  if (homeIjtemaRow)      homeIjtemaRow.style.display      = c.khudamUser  ? 'flex' : 'none';
   if (homeLajnaRow)       homeLajnaRow.style.display       = c.isLajnaUser ? 'flex' : 'none';
   if (homeIjtemaLajnaRow) homeIjtemaLajnaRow.style.display = c.isLajnaUser ? 'flex' : 'none';
+  if (el('home-khudam'))       el('home-khudam').textContent       = fmt(khudamRem);
+  if (el('home-ijtema'))       el('home-ijtema').textContent       = fmt(ijtemaRem);
   if (el('home-lajna'))        el('home-lajna').textContent        = fmt(lajnaRem);
   if (el('home-ijtema-lajna')) el('home-ijtema-lajna').textContent = fmt(ijtemaLajnaRem);
   if (el('home-total'))  el('home-total').textContent  = fmt(totalRem);
@@ -3250,14 +3264,18 @@ function obBuildSummary() {
   const tahrikMo  = tahrik / 12;
   const waqfMo    = waqf / 12;
 
-  // Khudam
-  const dobVal        = document.getElementById('ob-dob').value || null;
-  const agePreview    = dobVal ? getAge(dobVal) : null;
-  const isKhudamPrev  = agePreview !== null && agePreview >= 15 && agePreview <= 40;
-  const annualInc     = total * 12;
-  const khudamMoPrev  = isKhudamPrev ? annualInc * 0.01  / 12 : 0;
-  const ijtamaMoPrev  = isKhudamPrev ? annualInc * 0.005 / 12 : 0;
-  const grandMoFull   = aam + jalsaMo + tahrikMo + waqfMo + khudamMoPrev + ijtamaMoPrev;
+  // Khudam / Lajna auxiliary
+  const dobVal           = document.getElementById('ob-dob').value || null;
+  const agePreview       = dobVal ? getAge(dobVal) : null;
+  const genderPreview    = (document.querySelector('input[name="ob-gender"]:checked') || {}).value || 'male';
+  const isKhudamPrev     = genderPreview === 'male'   && agePreview !== null && agePreview >= 15 && agePreview <= 40;
+  const isLajnaPrev      = genderPreview === 'female' && agePreview !== null && agePreview >= 15;
+  const annualInc        = total * 12;
+  const khudamMoPrev     = isKhudamPrev ? annualInc * 0.01  / 12 : 0;
+  const ijtamaMoPrev     = isKhudamPrev ? annualInc * 0.005 / 12 : 0;
+  const lajnaMoPrev      = isLajnaPrev  ? annualInc * 0.01  / 12 : 0;
+  const ijtemaLajnaMoPrev = isLajnaPrev ? 35 / 12 : 0;
+  const grandMoFull      = aam + jalsaMo + tahrikMo + waqfMo + khudamMoPrev + ijtamaMoPrev + lajnaMoPrev + ijtemaLajnaMoPrev;
 
   document.getElementById('ob-done-name').textContent = name;
 
@@ -3271,8 +3289,10 @@ function obBuildSummary() {
   document.getElementById('ob-sum-waqf').textContent   = waqf   > 0 ? fmt(waqfMo)   + ' / mo' : 'Not set';
   document.getElementById('ob-sum-total').textContent  = fmt(grandMoFull);
 
-  const obKhudamRow = document.getElementById('ob-sum-khudam-row');
-  const obIjtemaRow = document.getElementById('ob-sum-ijtema-row');
+  const obKhudamRow      = document.getElementById('ob-sum-khudam-row');
+  const obIjtemaRow      = document.getElementById('ob-sum-ijtema-row');
+  const obLajnaRow       = document.getElementById('ob-sum-lajna-row');
+  const obIjtemaLajnaRow = document.getElementById('ob-sum-ijtema-lajna-row');
   if (obKhudamRow) {
     obKhudamRow.style.display = isKhudamPrev ? 'flex' : 'none';
     const el = document.getElementById('ob-sum-khudam');
@@ -3282,6 +3302,16 @@ function obBuildSummary() {
     obIjtemaRow.style.display = isKhudamPrev ? 'flex' : 'none';
     const el = document.getElementById('ob-sum-ijtema');
     if (el) el.textContent = fmt(ijtamaMoPrev) + ' / mo';
+  }
+  if (obLajnaRow) {
+    obLajnaRow.style.display = isLajnaPrev ? 'flex' : 'none';
+    const el = document.getElementById('ob-sum-lajna');
+    if (el) el.textContent = fmt(lajnaMoPrev) + ' / mo';
+  }
+  if (obIjtemaLajnaRow) {
+    obIjtemaLajnaRow.style.display = isLajnaPrev ? 'flex' : 'none';
+    const el = document.getElementById('ob-sum-ijtema-lajna');
+    if (el) el.textContent = fmt(ijtemaLajnaMoPrev) + ' / mo';
   }
 }
 
@@ -3401,6 +3431,29 @@ function openAScreen(id) {
   closeDrawer();
   document.querySelectorAll('.ascreen').forEach(s => s.classList.remove('open'));
   document.getElementById('ascreen-' + id).classList.add('open');
+  if (id === 'wasiyyat') {
+    const p = loadProfile();
+    const inp = document.getElementById('settings-wasiyyat-rate');
+    if (inp && p) {
+      inp.value = p.wasiyyatRate || 12.5;
+      updateWasiyyatPreview(p.wasiyyatRate || 12.5);
+    }
+    const toggle = document.getElementById('moosiToggle');
+    if (toggle && p) {
+      toggle.checked = !!p.isMoosi;
+      document.getElementById('moosiOffState').style.display = p.isMoosi ? 'none'  : 'block';
+      document.getElementById('moosiOnState').style.display  = p.isMoosi ? 'block' : 'none';
+    }
+  }
+}
+
+function updateWasiyyatPreview(rate) {
+  const preview = document.getElementById('settings-wasiyyat-preview');
+  if (!preview) return;
+  const p = loadProfile();
+  if (!p || !p.isMoosi) { preview.textContent = ''; return; }
+  const monthly = p.primaryIncome * (rate / 100);
+  preview.textContent = 'Monthly Wasiyyat: ' + fmt(monthly);
 }
 
 function closeAScreen() {
@@ -3647,7 +3700,7 @@ function loadMonthIntoUI(mk) {
   const logSection  = document.getElementById('pay-log-section');
   const upbStatus   = document.getElementById('upb-status-text');
 
-  if (record) {
+  if (record && record.status) {
     const statusLabel = record.status === 'paid' ? 'Paid' : record.status === 'partial' ? 'Partially Paid' : 'Missed';
     badge.textContent = record.status === 'paid' ? 'Paid ✓' : record.status === 'partial' ? 'Partial' : 'Missed';
     badge.className   = record.status === 'paid'    ? 'curr-status-badge csb-paid'
@@ -3698,6 +3751,11 @@ function loadMonthIntoUI(mk) {
   document.getElementById('pay-tahrik').textContent    = fmt(tahrikAmt);
   document.getElementById('pay-waqf').textContent      = fmt(waqfAmt);
   const el = id => document.getElementById(id);
+  // Show/hide auxiliary payment rows
+  if (el('pay-khudam-row'))      el('pay-khudam-row').style.display      = c.khudamUser  ? 'flex' : 'none';
+  if (el('pay-ijtema-row'))      el('pay-ijtema-row').style.display      = c.khudamUser  ? 'flex' : 'none';
+  if (el('pay-lajna-row'))       el('pay-lajna-row').style.display       = c.isLajnaUser ? 'flex' : 'none';
+  if (el('pay-ijtema-lajna-row'))el('pay-ijtema-lajna-row').style.display= c.isLajnaUser ? 'flex' : 'none';
   if (el('pay-khudam'))       el('pay-khudam').textContent       = fmt(khudamAmt);
   if (el('pay-ijtema'))       el('pay-ijtema').textContent       = fmt(ijtemaAmt);
   if (el('pay-lajna'))        el('pay-lajna').textContent        = fmt(lajnaAmt);
@@ -4031,10 +4089,14 @@ function renderSummary() {
   // Khudam rows
   const khudamAnnual = c.khudamUser ? c.annualInc * 0.01  : 0;
   const ijtemaAnnual = c.khudamUser ? c.annualInc * 0.005 : 0;
-  const sumKhudamRow = document.getElementById('sum-khudam-row');
-  const sumIjtemaRow = document.getElementById('sum-ijtema-row');
-  if (sumKhudamRow) sumKhudamRow.style.display = c.khudamUser ? 'block' : 'none';
-  if (sumIjtemaRow) sumIjtemaRow.style.display = c.khudamUser ? 'block' : 'none';
+  const sumKhudamRow      = document.getElementById('sum-khudam-row');
+  const sumIjtemaRow      = document.getElementById('sum-ijtema-row');
+  const sumLajnaRow2      = document.getElementById('sum-lajna-row');
+  const sumIjtemaLajnaRow2 = document.getElementById('sum-ijtema-lajna-row');
+  if (sumKhudamRow)       sumKhudamRow.style.display       = c.khudamUser  ? 'block' : 'none';
+  if (sumIjtemaRow)       sumIjtemaRow.style.display       = c.khudamUser  ? 'block' : 'none';
+  if (sumLajnaRow2)       sumLajnaRow2.style.display       = c.isLajnaUser ? 'block' : 'none';
+  if (sumIjtemaLajnaRow2) sumIjtemaLajnaRow2.style.display = c.isLajnaUser ? 'block' : 'none';
   if (c.khudamUser) {
     document.getElementById('sum-khudam-paid').textContent = fmt(paidKhudam);
     document.getElementById('sum-khudam-of').textContent   = 'of ' + fmt(annualKhudam);
@@ -4045,10 +4107,6 @@ function renderSummary() {
     const ijtamaPct = annualIjtema > 0 ? Math.min(100, Math.round((paidIjtema / annualIjtema) * 100)) : 0;
     document.getElementById('sum-ijtema-bar').style.width  = ijtamaPct + '%';
   }
-  const sumLajnaRow      = document.getElementById('sum-lajna-row');
-  const sumIjtemaLajnaRow = document.getElementById('sum-ijtema-lajna-row');
-  if (sumLajnaRow)       sumLajnaRow.style.display      = c.isLajnaUser ? 'block' : 'none';
-  if (sumIjtemaLajnaRow) sumIjtemaLajnaRow.style.display = c.isLajnaUser ? 'block' : 'none';
   if (c.isLajnaUser) {
     document.getElementById('sum-lajna-paid').textContent      = fmt(paidLajna);
     document.getElementById('sum-lajna-of').textContent        = 'of ' + fmt(lajnaAnnual);
@@ -4152,14 +4210,22 @@ function toggleMoosi() {
   renderApp();
 }
 
-function setRate(chip, rate) {
-  chip.closest('.rate-chips').querySelectorAll('.rate-chip').forEach(c => c.classList.remove('on'));
-  chip.classList.add('on');
-  // Save rate to profile and recalculate if Moosi is on
+function setRate() {
+  const inp = document.getElementById('settings-wasiyyat-rate');
+  const errEl = document.getElementById('settings-wasiyyat-err');
+  if (!inp) return;
+  const rate = parseFloat(inp.value);
+  if (errEl) errEl.textContent = '';
+  if (isNaN(rate) || rate < 1) return;
+  if (rate > 33) {
+    if (errEl) errEl.textContent = 'Maximum Wasiyyat rate is 33%.';
+    return;
+  }
   const p = loadProfile();
   if (!p) return;
-  p.wasiyyatRate = parseFloat(rate);
+  p.wasiyyatRate = rate;
   saveProfile(p);
+  updateWasiyyatPreview(rate);
   if (p.isMoosi) renderApp();
 }
 
