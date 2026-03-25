@@ -85,7 +85,7 @@
   .sbody {
     flex:1; overflow-y:auto; overflow-x:hidden;
     -webkit-overflow-scrolling:touch; scrollbar-width:none;
-    padding:18px 18px 90px;
+    padding:18px 18px calc(80px + env(safe-area-inset-bottom, 12px));
   }
   .sbody::-webkit-scrollbar { display:none; }
 
@@ -132,11 +132,19 @@
 
   /* ── BOTTOM NAV ── */
   .bottomnav {
-    position:absolute; bottom:0; left:0; right:0;
-    background:var(--white); border-top:1px solid var(--line);
-    padding:10px 6px 22px;
-    display:flex; justify-content:space-around;
-    flex-shrink:0;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--white);
+    border-top: 1px solid var(--line);
+    padding: 8px 6px env(safe-area-inset-bottom, 12px);
+    display: flex;
+    flex-shrink: 0;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
   }
   .bnav-item {
     display:flex; flex-direction:column; align-items:center;
@@ -785,12 +793,19 @@
 
 /* FIX 5: Bottom nav — SVG icons, no emoji, highlight active cleanly */
 .bottomnav {
-  position: static !important;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
   background: var(--white);
   border-top: 1px solid var(--line);
-  padding: 8px 6px 20px;
+  padding: 8px 6px env(safe-area-inset-bottom, 12px);
   display: flex;
   flex-shrink: 0;
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
 }
 
 .bnav-item {
@@ -1409,7 +1424,7 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
-  height: 100%;
+  height: 100dvh;
   width: 100%;
   background: var(--bg);
 }
