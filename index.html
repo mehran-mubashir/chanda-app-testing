@@ -3075,6 +3075,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
+window.addEventListener('popstate', function(event) {
+  // If an account screen is open, close it first
+  const activeScreen = document.querySelector('.ascreen.open');
+  if (activeScreen) {
+    closeAScreen();
+    return;
+  }
+  // If the drawer is open, close it
+  const drawer = document.getElementById('drawer');
+  if (drawer && drawer.classList.contains('open')) {
+    closeDrawer();
+    return;
+  }
+});
+
 function showOnboarding() {
   document.getElementById('onboarding').style.display = 'flex';
   document.getElementById('main-app').style.display   = 'none';
@@ -3419,6 +3434,7 @@ function switchCTab(id, btn) {
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
+  history.pushState({ drawer: true }, '', '');
 }
 
 function closeDrawer() {
@@ -3431,6 +3447,7 @@ function openAScreen(id) {
   closeDrawer();
   document.querySelectorAll('.ascreen').forEach(s => s.classList.remove('open'));
   document.getElementById('ascreen-' + id).classList.add('open');
+  history.pushState({ ascreen: id }, '', '');
   if (id === 'wasiyyat') {
     const p = loadProfile();
     const inp = document.getElementById('settings-wasiyyat-rate');
